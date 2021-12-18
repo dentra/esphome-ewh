@@ -11,12 +11,12 @@ The protocol is described in [reverse.md](reverse.md).
 
 At this moment the componet is build using climate platform and allows the following:
 * Control current temperature
-* Chamnge target boil temperature
+* Change target boil temperature
 * Change boil power to 700W
 * Change boil power to 1300W
 * Change boil power to 2000W
 * Change BST (Bacteria Stop technology) mode
-* Sync ant control internal clock
+* Sync and control internal clock
 * Set and start timer
 * Enter to no frost mode
 
