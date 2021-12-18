@@ -2,7 +2,7 @@
 
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/dentra/esphome-components)
 
-This is a ESPHome component to control Electrolux Water Heater and possibly other boilers from Midea boilers (Ballu etc) using uart protocol.
+This is a ESPHome component to control Electrolux Water Heater and possibly other boilers (Ballu, Zanussi) using uart protocol.
 
 Control is possible via custom dongle. You can make it yourself or buy a ready made.
 For example look at [iot-uni-dongle](https://github.com/dudanov/iot-uni-dongle) it fully opensource and also availale for order.
