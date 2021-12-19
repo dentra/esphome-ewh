@@ -1,6 +1,18 @@
 # Electrolux Water Heater
 
-[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/dentra/esphome-components)
+[![Open in Visual Studio Code][open-in-vscode-shield]][open-in-vscode]
+[![Community Forum][community-forum-shield]][community-forum]
+[![PayPal.Me][paypal-me-shield]][paypal-me]
+
+[open-in-vscode-shield]: https://open.vscode.dev/badges/open-in-vscode.svg
+[open-in-vscode]: https://open.vscode.dev/dentra/esphome-components
+
+[community-forum-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Forum&style=popout&color=41bdf5&logo=HomeAssistant&logoColor=white
+[community-forum]: https://community.home-assistant.io/t/electrolux-water-heater-integration/368498
+
+[paypal-me-shield]: https://img.shields.io/static/v1.svg?label=%20&message=PayPal.Me&logo=paypal
+[paypal-me]: https://paypal.me/dentra0
+
 
 This is a ESPHome component to control Electrolux Water Heater and possibly other boilers (Ballu, Zanussi) using uart protocol.
 
@@ -40,6 +52,7 @@ uart:
 
 climate:
   - platform: ewh
+    id: wh
     name: "$name"
 
     # Sensor, Optional, Bacteria Stop Technology switch
@@ -53,6 +66,29 @@ climate:
     # Sensor, Optional, Timer sensor
     timer:
       name: $name Timer
+
+# Additionally you could sync time on your boiler
+time:
+  # chose right platform homeasistant or sntp
+  - platform: sntp
+    on_time:
+      # updates every 30 minutes
+      seconds: 0
+      minutes: /30
+      then:
+        - lambda: id(wh).sync_clock();
+
+# Populate service "timer" to home assitant
+api:
+  services:
+    - service: timer
+      variables:
+        hours: int
+        minutes: int
+        temperature: int
+      then:
+        lambda: id(wh).timer(hours, minutes, temperature);
+
 ```
 
 For full configuration example, please take a look at [ewh.yaml](ewh.yaml) file.
