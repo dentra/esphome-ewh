@@ -1,18 +1,22 @@
 substitutions:
   name: Water Heater
   node_name: water-heater
+  ewh_version: "master"
 
 esphome:
   name: $node_name
   platform: ESP8266
   # use "esp12e" for iot-uni-dongle, "esp8285" for coolrf-heatstick
   board: esp12e
+  project:
+    name: "dentra.ewh"
+    version: $ewh_version
   on_boot:
     then:
       - lambda: id(wh).sync_clock();
 
 external_components:
-  # - source: github://dentra/esphome-ewh@2021.12.0
+  # - source: github://dentra/esphome-ewh@$ewh_version
   - source: components
 
 wifi:
