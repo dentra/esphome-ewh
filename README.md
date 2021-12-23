@@ -93,6 +93,23 @@ api:
 
 For full configuration example, please take a look at [ewh.yaml](ewh.yaml) file.
 
+## Expiremental cloud support
+
+> To get it work you need to get mac address of your original dongle first. For example via command: `echo -e "AT+WSMAC\r\n" | nc <IP> 8899`.
+
+Next, just add `cloud_mac` attribute to `climate.ewh` platform.
+```yaml
+...
+climate:
+  ...
+  - platform: ewh
+  ...
+    cloud_mac: "12:34:56:78:90:AB"
+    # or from your secrets.yaml
+    cloud_mac: !secret dongle_mac
+  ...
+```
+
 ## Known issues
 
 Sometimes a command, for example, to change a mode or temperature is not executed and a second change is required
