@@ -62,12 +62,12 @@ void EWHClimate::control(const ClimateCall &call) {
   }
 
   if (preset != PRESET_TIMER) {
-    this->send_control_state_(ewh_mode_t::SET_OPERATION, &wh_mode, sizeof(wh_mode));
+    this->send_set_mode(wh_mode);
   } else {
     ewh_timer_t wh_timer;
     wh_timer.mode = wh_mode.mode;
     wh_timer.temperature = wh_mode.temperature;
-    this->send_control_state_(ewh_timer_t::SET_OPERATION, &wh_timer, sizeof(wh_timer));
+    this->send_set_timer(wh_timer);
   }
 
   // this->publish_state();

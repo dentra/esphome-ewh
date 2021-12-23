@@ -63,12 +63,63 @@ void EWHComponent::read(const ewh_state_t &state) {
   if (this->bst_ != nullptr) {
     this->bst_->publish_state(state.bst.state != 0);
   }
+
   if (this->clock_ != nullptr) {
-    this->clock_->publish_state(str_snprintf("%02u:%02u", 5, state.clock_hours, state.clock_minutes));
+    auto clock = str_snprintf("%02u:%02u", 5, state.clock_hours, state.clock_minutes);
+    if (this->clock_->state != clock) {
+      this->clock_->publish_state(clock);
+    }
   }
+
   if (this->timer_ != nullptr) {
-    this->timer_->publish_state(str_snprintf("%02u:%02u", 5, state.timer_hours, state.timer_minutes));
+    auto timer = str_snprintf("%02u:%02u", 5, state.timer_hours, state.timer_minutes);
+    if (this->timer_->state != timer) {
+      this->timer_->publish_state(timer);
+    }
   }
+}
+
+void EWHComponent::read(const PacketType type, const uint8_t *data, uint32_t size) {
+  if (this->debug_ == nullptr) {
+    return;
+  }
+  auto debug = str_sprintf("DEV %02X: %s", type, hexencode(data, size).c_str());
+  if (this->debug_->state != debug) {
+    this->debug_->publish_state(debug);
+  }
+}
+
+bool EWHComponent::read(const ewh_unknown81 &unk) {
+  bool res = ElectroluxWaterHeater::read(unk);
+  if (this->debug_ && !res) {
+    auto debug = str_sprintf("DEV 81: %s", hexencode(reinterpret_cast<const uint8_t *>(&unk), sizeof(unk)).c_str());
+    if (this->debug_->state != debug) {
+      this->debug_->publish_state(debug);
+    }
+  }
+  return res;
+}
+
+bool EWHComponent::read(const ewh_unknown86 &unk) {
+  bool res = ElectroluxWaterHeater::read(unk);
+  if (this->debug_ && !res) {
+    auto debug = str_sprintf("DEV 86: %s", hexencode(reinterpret_cast<const uint8_t *>(&unk), sizeof(unk)).c_str());
+    if (this->debug_->state != debug) {
+      this->debug_->publish_state(debug);
+    }
+  }
+  return res;
+}
+
+bool EWHComponent::read(const ewh_unknown87 &unk) {
+  bool res = ElectroluxWaterHeater::read(unk);
+  if (this->debug_ && !res) {
+    auto debug = str_sprintf("DEV 87: %s", hexencode(reinterpret_cast<const uint8_t *>(&unk), sizeof(unk)).c_str());
+    if (this->debug_->state != debug) {
+      this->debug_->publish_state(debug);
+    }
+  }
+  return res;
 }
 
 }  // namespace ewh
