@@ -12,7 +12,8 @@ esphome:
       - lambda: id(wh).sync_clock();
 
 external_components:
-  - source: github://dentra/esphome-ewh@2021.12.0
+  # - source: github://dentra/esphome-ewh@2021.12.0
+  - source: components
 
 wifi:
   ssid: !secret wifi_ssid
@@ -23,6 +24,9 @@ wifi:
 
 captive_portal:
 ota:
+  on_begin:
+    then:
+      - lambda: id(wh).cloud->disconnect();
 
 api:
   services:
@@ -79,12 +83,16 @@ climate:
   - platform: ewh
     id: wh
     name: "$name"
+    cloud_mac: !secret device_mac
     bst:
       name: $name BST # Bacteria Stop Technology
     clock:
       name: $name Clock
     timer:
       name: $name Timer
+    #  write unknown commands to a debug sensor
+    debug:
+      name: $name Debug
 
 sensor:
   - platform: wifi_signal
@@ -103,3 +111,53 @@ sensor:
 button:
   - platform: restart
     name: "$name Restart"
+
+  - platform: template
+    name: "$name Cmd 01"
+    on_press:
+      - lambda: id(wh).exec(0x01);
+    entity_category: diagnostic
+
+  - platform: template
+    name: "$name Cmd 06"
+    on_press:
+      - lambda: id(wh).exec(0x06,{0,0,0,0,0,0,0,0,0,0,0,0,0,0x1a,0x07,0x32});
+    entity_category: diagnostic
+
+  - platform: template
+    name: "$name Cmd 07"
+    on_press:
+      - lambda: id(wh).exec(0x07);
+    entity_category: diagnostic
+
+  # this is a command to request for a boiler state
+  - platform: template
+    name: "$name Cmd 08"
+    on_press:
+      - lambda: id(wh).exec(0x08, {0x10, 0x04});
+    entity_category: diagnostic
+
+  # this command will sync internal boiler clock immediately
+  - platform: template
+    name: "$name Sync Clock"
+    on_press:
+      - lambda: id(wh).sync_clock();
+    entity_category: diagnostic
+
+  - platform: template
+    name: "$name Cloud connect"
+    on_press:
+      - lambda: id(wh).cloud->connect();
+    entity_category: diagnostic
+
+  - platform: template
+    name: "$name Cloud disconnect"
+    on_press:
+      - lambda: id(wh).cloud->disconnect();
+    entity_category: diagnostic
+
+binary_sensor:
+  - platform: template
+    name: "$name Cloud connected"
+    lambda: return id(wh).cloud->is_connected();
+    entity_category: diagnostic
