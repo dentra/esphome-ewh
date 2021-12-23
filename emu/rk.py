@@ -142,6 +142,7 @@ def process_aa(buf: bytes):
     elif cmd == CMD_07_REQ_UNKNOWN:
         # write_aa("AA 11 87 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 42")
         write_aa("AA 11 87.00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32 95")
+        # write_aa("AA 11 87.00.00.00.00.00.00.00.00.B9.00.00.00.00.00.00.00 FB")
     elif cmd == CMD_08_REQ_STATE:
         # write_aa("AA 0A 88 00 1B 23 14 13 01 02 00 00 A4")
         write_cmd(

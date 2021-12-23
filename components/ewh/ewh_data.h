@@ -49,18 +49,18 @@ enum PacketType : uint8_t {
    * Result of PACKET_REQ_UNKNOWN01.
    * @returns 00.00.00.00.00.11
    */
-  PACKET_RSP_UNKNOWN01 = _PACKET_RSP_CMD_MASK | PACKET_REQ_UNKNOWN01,
+  PACKET_RSP_UNKNOWN81 = _PACKET_RSP_CMD_MASK | PACKET_REQ_UNKNOWN01,
   /**
    * Result of PACKET_REQ_UNKNOWN06.
    * @returns 01
    */
-  PACKET_RSP_UNKNOWN06 = _PACKET_RSP_CMD_MASK | PACKET_REQ_UNKNOWN06,
+  PACKET_RSP_UNKNOWN86 = _PACKET_RSP_CMD_MASK | PACKET_REQ_UNKNOWN06,
   /**
    * Result of PACKET_REQ_UNKNOWN07.
    * First time returns 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
    * @returns 00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32 (0xA1=161, 0x07=7, 0x32=50)
    */
-  PACKET_RSP_UNKNOWN07 = _PACKET_RSP_CMD_MASK | PACKET_REQ_UNKNOWN07,
+  PACKET_RSP_UNKNOWN87 = _PACKET_RSP_CMD_MASK | PACKET_REQ_UNKNOWN07,
 
   /**
    * Result of PACKET_REQ_STATE
@@ -129,6 +129,32 @@ struct ewh_state_t {
   uint8_t timer_minutes;
   uint8_t unknown;
   ewh_bst_t bst;  // 0-off, 1-enabled, возможно другая цифра, когда режим активен.
+};
+
+// Response 81
+// 00.00.00.00.00.11
+struct ewh_unknown81 {
+  uint8_t unknown00[5];  // always {0,0,0,0,0}
+  uint8_t unknown11;     // always 11
+};
+
+// Response 86
+// 01
+struct ewh_unknown86 {
+  uint8_t unknown01;  // always 01
+};
+
+// Response 87 and probably Request 06
+// 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+// 00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32
+// 00.00.00.00.00.00.00.00.B9.00.00.00.00.00.00.00
+struct ewh_unknown87 {
+  uint8_t unknown00_8[8];  // always {0,0,0,0,0,0,0,0}
+  uint8_t unknownB9;       // 00 or B9
+  uint8_t unknown00_4[4];  // always {0,0,0,0}
+  uint8_t unknown1A;       // 00 or 1A
+  uint8_t unknown07;       // 00 or 07
+  uint8_t unknown32;       // 00 or 32
 };
 
 #pragma pack(pop)

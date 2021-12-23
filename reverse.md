@@ -37,9 +37,13 @@ Returns response with command `87` with unknown data structure.
 ```
 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32 (0xA1=161, 0x07=7, 0x32=50)
+00.00.00.00.00.00.00.00.B9.00.00.00.00.00.00.00 (0xB9=185)
 ```
 
-> Requested 3 times after device connected to server
+> With second result it requested 3 times after device connected to server, then executed command 01, then app thinks that device is online
+> With first ant third result it requested infinetely
+> Command 06 changes third result to second.
+> third result i get when turn off device ofline for two about 2-3 hours.
 
 ## `06` - Unknown
 
@@ -51,9 +55,9 @@ Unknown 16 bytes data structure.
 00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32
 ```
 
-Returns command 86 with on unknown 1 byte body:
+Returns command 86 with an unknown 1 byte body:
 ```
-01
+01 (ok?)
 ```
 
 non repeatable, maby from ititial device pairing process.
