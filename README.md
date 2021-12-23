@@ -39,7 +39,7 @@ Sample configuration:
 ```yaml
 # add this repo
 external_components:
-  - source: github://dentra/esphome-ewh
+  - source: github://dentra/esphome-ewh@2021.12.0
 
 logger:
   # Make sure logging is not using the serial port
@@ -92,6 +92,10 @@ api:
 ```
 
 For full configuration example, please take a look at [ewh.yaml](ewh.yaml) file.
+
+## Known issues
+
+Sometimes a command, for example, to change a mode or temperature is not executed and a second change is required
 
 ## Help needed
 
