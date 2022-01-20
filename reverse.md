@@ -4,6 +4,7 @@
 
 * `AA` - Magic prefix. Fixed to `0xAA`
 * `XX` - Size of `YY` packet in bytes
+* `YY .. YY` - Data packet
 * `ZZ` - CRC. Sum of `AA+XX+YY..YY`, clipped to byte.
 
 # Packet Structure
@@ -17,7 +18,7 @@
 
 Some of request commands have corresponding response with `0x80` mask.
 
-## `01` - Unknown
+## `01` - Possibly device identification
 
 Zero body.
 
@@ -27,40 +28,30 @@ Returns response command `81` with fixed data.
 00.00.00.00.00.11
 ```
 
-> Requested 3 times after device connected to server
+> This command is executed from cloud server every time it connects to device.
 
-## `07` - Unknown
+> This command will not executed from cloud server if pairing process already completed and 87 command result is not equals data saved by 06 command call.
+
+## `06` - Save Data (?)
+
+any 16 bytes data structure.
+
+Returns command `86` with 1 byte body, 01 means OK, 00 means ERROR. Later this data can be loaded via `07' command.
+
+> This command used in cloud device pairing process.
+
+## `07` - Load Data (?)
 
 Zero body.
 
-Returns response with command `87` with unknown data structure.
+This command is executed from cloud server every time it connects to device. Before pairing process the all data must be filled with zeroes.
+
+Returns response with command `87` with 16 bytes data structure.
 ```
-00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32 (0xA1=161, 0x07=7, 0x32=50)
-00.00.00.00.00.00.00.00.B9.00.00.00.00.00.00.00 (0xB9=185)
-```
-
-> With second result it requested 3 times after device connected to server, then executed command 01, then app thinks that device is online
-> With first ant third result it requested infinetely
-> Command 06 changes third result to second.
-> third result i get when turn off device ofline for two about 2-3 hours.
-
-## `06` - Unknown
-
-Unknown 16 bytes data structure.
-
-> Note: equals to `87` command result.
-
-```
-00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (initital cloud data)
+00.00.00.00.00.00.00.00.00.00.00.00.00.1a.25.04 (cloud data with cloud UID triplet, this sample is 263704)
 ```
 
-Returns command 86 with an unknown 1 byte body:
-```
-01 (ok?)
-```
-
-non repeatable, maby from ititial device pairing process.
 
 ## `08` - Request device state
 

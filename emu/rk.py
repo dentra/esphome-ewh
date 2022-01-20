@@ -9,6 +9,8 @@ import yaml
 
 
 MAC = "00:00:00:00:00:00"
+UID_NULL = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+UID = UID_NULL
 URL = "socket://dongle.rusklimat.ru:10001?logging=debug"
 
 if len(sys.argv) > 1:
@@ -17,9 +19,12 @@ else:
     with open("secrets.yaml", "r") as stream:
         try:
             yml = yaml.safe_load(stream)
-            mac = yml["device_mac"]
+            mac = yml["device_mac2"]
             if mac:
                 MAC = mac
+            uid = yml["device_uid2"]
+            if uid:
+                UID = uid
         except yaml.YAMLError as exc:
             pass
         except KeyError as exc:
@@ -28,12 +33,12 @@ else:
 print(f"Using MAC address: {MAC}")
 
 SHOW_AT = False
-SHOW_AA = False
+SHOW_AA = 1
 
-CMD_01_REQ_UNKNOWN = 0x01
-CMD_06_REQ_UNKNOWN = 0x06
+CMD_01_REQ_DEV_TYPE = 0x01
+CMD_06_REQ_SAVE_DATA = 0x06
 CMD_05_RSP_ERROR = 0x05
-CMD_07_REQ_UNKNOWN = 0x07
+CMD_07_REQ_LOAD_DATA = 0x07
 CMD_08_REQ_STATE = 0x08
 CMD_88_RSP_STATE = 0x88
 CMD_0A_REQ_SET = 0x0A
@@ -67,11 +72,11 @@ FS_UNK = "unk"  # unknown
 FS_BST = "bst"  # bst
 
 DEV_STATE = {
-    FS_ST: 0,
-    FS_CT: 35,
-    FS_TT: 60,
-    FS_CH: 0,
-    FS_CM: 0,
+    FS_ST: 1,
+    FS_CT: 38,
+    FS_TT: 62,
+    FS_CH: 19,
+    FS_CM: 10,
     FS_TH: 0,
     FS_TM: 0,
     FS_UNK: 0,
@@ -98,8 +103,17 @@ def write_at(buf: str):
 def write_aa(buf: str):
     """Write AA commant to UART"""
     buf = bytes.fromhex(buf.replace(" ", "").replace(".", ""))
-    if SHOW_AA:
+
+    if SHOW_AA > 0:
+        bbb = buf[2:-1]
+        cmd = bbb[0]
+        if cmd != 0x88 and cmd != 0x87 and cmd != 0x81:
+            bbb = bbb[1:]
+            print(f"w >>> {cmd:02X}: {bbb.hex('.')} ({len(bbb)})")
+
+    if SHOW_AA > 1:
         print(f"w >>> {buf.hex('.')} ({len(buf)})")
+
     if not DEBUG:
         time.sleep(1)
     ser.write(buf)
@@ -123,26 +137,28 @@ def write_cmd(cmd: int, data: str):
 def process_aa(buf: bytes):
     """Process AA commant"""
     global DEV_STATE
+    global UID
 
-    if SHOW_AA:
+    if SHOW_AA > 1:
         print(f"r <<< {buf.hex('.')} ({len(buf)})")
     # remove aa, sz and crc
     crc = buf[len(buf) - 1]
     buf = buf[2:-1]
     cmd = buf[0]
     buf = buf[1:]
-    # print(f"r <<< got cmd {cmd:02X}: {buf.hex('.')} ({len(buf)}), CRC: {crc:02X}")
+    if SHOW_AA > 0 and cmd != 0x08 and cmd != 0x01 and cmd != 0x07:
+        print(f"r <<< {cmd:02X}: {buf.hex('.')} ({len(buf)})")
 
     if False:  # just pretty print
         pass
-    elif cmd == CMD_01_REQ_UNKNOWN:
-        write_aa("aa 07 81.00.00.00.00.00.11 43")  # 81.00.00.00.00.00.11 (7) CRC: 43
-    elif cmd == CMD_06_REQ_UNKNOWN:  # 06000000000000000000000000001a0732
-        write_aa("aa 02 86.01 33")
-    elif cmd == CMD_07_REQ_UNKNOWN:
-        # write_aa("AA 11 87 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 42")
-        write_aa("AA 11 87.00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32 95")
-        # write_aa("AA 11 87.00.00.00.00.00.00.00.00.B9.00.00.00.00.00.00.00 FB")
+    elif cmd == CMD_01_REQ_DEV_TYPE:
+        write_cmd(0x81, "00.00.00.00.00.11")
+    elif cmd == CMD_06_REQ_SAVE_DATA:
+        UID = buf.hex(".")
+        print(f"new UID {UID}")
+        write_cmd(0x86, "01")
+    elif cmd == CMD_07_REQ_LOAD_DATA:
+        write_cmd(0x87, UID)
     elif cmd == CMD_08_REQ_STATE:
         # write_aa("AA 0A 88 00 1B 23 14 13 01 02 00 00 A4")
         write_cmd(
@@ -251,7 +267,11 @@ def process():
     while True:
         available = ser.in_waiting
         if available > 0:
-            buf = process_buf(buf + ser.read(available))
+            try:
+                buf = process_buf(buf + ser.read(available))
+            except serial.SerialException as err:
+                print(err)
+                break
 
 
 def test_data():
@@ -280,7 +300,7 @@ def test_data():
 
 if DEBUG:
     SHOW_AT = True
-    SHOW_AA = True
+    SHOW_AA = 2
     test_data()
 
 process()
