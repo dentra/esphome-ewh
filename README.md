@@ -19,7 +19,7 @@ This is a ESPHome component to control Electrolux Water Heater and possibly othe
 Control is possible via custom dongle. You can make it yourself or buy a ready made.
 For example look at [iot-uni-dongle](https://github.com/dudanov/iot-uni-dongle) it fully opensource and also availale for order.
 
-The protocol is described in [reverse.md](reverse.md).
+The communucation uart protocol is reversed on 99.9% and fully described at [reverse.md](reverse.md) file.
 
 At this moment the componet is build using climate platform and allows the following:
 * Control current temperature
@@ -29,95 +29,64 @@ At this moment the componet is build using climate platform and allows the follo
 * Change boil power to 2000W
 * Change BST (Bacteria Stop technology) mode
 * Sync and control internal clock
-* Set and start timer
-* Enter to no frost mode
+* Set and start internal timer
+* Enter to "No Frost/Atifreeze" mode
 
 ## Build ESPHome firmware
 
-Sample configuration:
+Sample configuration (available for [download](ewh.yaml)):
 
 ```yaml
-# add this repo
-external_components:
-  - source: github://dentra/esphome-ewh@2021.12.0
+substitutions:
+  # main prefix for all entities
+  name: "Water Heater"
+  # name of your node
+  node_name: "water-heater"
+  # use "esp12e" for iot-uni-dongle, "esp8285" for coolrf-heatstick, or your own if you know it
+  board: "esp12e"
+  # time platform: "sntp" or "homeassistant"
+  time_platform: "sntp"
+  # SSID of your wifi
+  wifi_ssid: !secret wifi_ssid
+  # password of your wifi
+  wifi_password: !secret wifi_password
+  # password for fallback wifi hotspot
+  wifi_ap_password: !secret wifi_ap_password
+  # version of ewh
+  ewh_version: "2022.1.0"
 
-logger:
-  # Make sure logging is not using the serial port
-  baud_rate: 0
+# please do not change packeages order it is very important, just comment/uncomment
+packages:
+  # required package, do not comment
+  ewh: github://dentra/esphome-ewh/ewh-pkg-ewh.yaml@$ewh_version
 
-uart:
-  tx_pin: TX
-  rx_pin: RX
-  baud_rate: 9600
+  ## optional package, uncomment next line to enable additional diagnostic clock sensor
+  # clock: github://dentra/esphome-ewh/ewh-pkg-clock.yaml@$ewh_version
 
-climate:
-  - platform: ewh
-    id: wh
-    name: "$name"
+  ## optional package, uncomment next line to enable additional diagnostic timer sensor
+  # timer: github://dentra/esphome-ewh/ewh-pkg-timer.yaml@$ewh_version
 
-    # Sensor, Optional, Bacteria Stop Technology switch
-    bst:
-      name: $name BST
+  ## optional package, uncomment next line to enable standalone web ui
+  # web: github://dentra/esphome-ewh/ewh-pkg-web.yaml@$ewh_version
 
-    # Sensor, Optional, Clock sensor
-    clock:
-      name: $name Clock
+  ## optional package, uncomment next line to enable experimental cloud support
+  # cloud: github://dentra/esphome-ewh/ewh-pkg-cloud.yaml@$ewh_version
 
-    # Sensor, Optional, Timer sensor
-    timer:
-      name: $name Timer
-
-# Additionally you could sync time on your boiler
-time:
-  # chose right platform homeasistant or sntp
-  - platform: sntp
-    on_time:
-      # updates every 30 minutes
-      seconds: 0
-      minutes: /30
-      then:
-        - lambda: id(wh).sync_clock();
-
-# Populate service "timer" to home assitant
-api:
-  services:
-    - service: timer
-      variables:
-        hours: int
-        minutes: int
-        temperature: int
-      then:
-        lambda: id(wh).timer(hours, minutes, temperature);
-
+  # required package, do not comment
+  core: github://dentra/esphome-ewh/ewh-pkg-core.yaml@$ewh_version
 ```
-
-For full configuration example, please take a look at [ewh.yaml](ewh.yaml) file.
 
 ## Expiremental cloud support
 
-> To get it work you need to get mac address of your original dongle first. For example via command: `echo -e "AT+WSMAC\r\n" | nc <IP> 8899`.
-
-Next, just add `cloud_mac` attribute to `climate.ewh` platform.
-```yaml
-...
-climate:
-  ...
-  - platform: ewh
-  ...
-    cloud_mac: "12:34:56:78:90:AB"
-    # or from your secrets.yaml
-    cloud_mac: !secret dongle_mac
-  ...
-```
+Please see instructions [here](components/ewh_cloud/README.md).
 
 ## Known issues
 
-Sometimes a command, for example, to change a mode or temperature is not executed and a second change is required
+~~Sometimes a command, for example, to change a mode or temperature is not executed and a second change is required.~~
 
 ## Help needed
 
-When the water is heated to the required temperature, the boiler can enter to an idle mode (display shows 0 and temperature) but unfortunally I can't get this state yet. Obtaining this state will allow to make energy calculation.
+When the water is heated to the required temperature, the boiler can enter to an idle mode (display shows 0 and temperature) but unfortunally I can't get this state yet. Obtaining this state will allow to make energy calculation. If you know the command that can be sent to the boiler to get this state - it will be superior. Please let me know it.
 
-
-### Your thanks
+## Your thanks
 If this project was useful to you, you can [buy me](https://paypal.me/dentra0) a Cup of coffee :)
