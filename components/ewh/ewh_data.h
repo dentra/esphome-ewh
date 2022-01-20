@@ -4,6 +4,9 @@
 
 // https://elux-ru.ru/upload/iblock/0d6/manual_centurio_iq_2_0.pdf
 
+namespace esphome {
+namespace ewh {
+
 #pragma pack(push, 1)
 
 enum {
@@ -11,21 +14,29 @@ enum {
   MAX_TEMPERATURE = 75,
 };
 
-enum : uint8_t { FRAME_HEADER = 0xAA };
+enum : uint8_t {
+  FRAME_HEADER = 0xAA,
+
+  OFFSET_FRAME_HEADER = 0,
+  OFFSET_SIZE = 1,
+  OFFSET_COMMAND = 2,
+};
 
 enum PacketType : uint8_t {
   /**
-   * Unknown zero-bdy command.
+   * Possibly device type request.
    */
-  PACKET_REQ_UNKNOWN01 = 0x01,
-
-  /** */
-  PACKET_REQ_UNKNOWN06 = 0x06,
+  PACKET_REQ_DEV_TYPE = 0x01,
 
   /**
-   * Unknown zero-bdy command.
+   * Request to save wh_data structure.
    */
-  PACKET_REQ_UNKNOWN07 = 0x07,
+  PACKET_REQ_SAVE_DATA = 0x06,
+
+  /**
+   * Request to load previosly saved wh_data structure.
+   */
+  PACKET_REQ_LOAD_DATA = 0x07,
 
   /**
    * Request device state.
@@ -46,24 +57,23 @@ enum PacketType : uint8_t {
   _PACKET_RSP_CMD_MASK = 0x80,
 
   /**
-   * Result of PACKET_REQ_UNKNOWN01.
-   * @returns 00.00.00.00.00.11
+   * Result of PACKET_REQ_DEV_TYPE.
+   * @returns ewh_dev_type_t
    */
-  PACKET_RSP_UNKNOWN81 = _PACKET_RSP_CMD_MASK | PACKET_REQ_UNKNOWN01,
+  PACKET_RSP_DEV_TYPE = _PACKET_RSP_CMD_MASK | PACKET_REQ_DEV_TYPE,
   /**
-   * Result of PACKET_REQ_UNKNOWN06.
-   * @returns 01
+   * Result of PACKET_REQ_SAVE_DATA.
+   * @returns ewh_result_t
    */
-  PACKET_RSP_UNKNOWN86 = _PACKET_RSP_CMD_MASK | PACKET_REQ_UNKNOWN06,
+  PACKET_RSP_SAVE_DATA = _PACKET_RSP_CMD_MASK | PACKET_REQ_SAVE_DATA,
   /**
-   * Result of PACKET_REQ_UNKNOWN07.
-   * First time returns 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-   * @returns 00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32 (0xA1=161, 0x07=7, 0x32=50)
+   * Result of PACKET_REQ_LOAD_DATA.
+   * @returns wh_data_t
    */
-  PACKET_RSP_UNKNOWN87 = _PACKET_RSP_CMD_MASK | PACKET_REQ_UNKNOWN07,
+  PACKET_RSP_LOAD_DATA = _PACKET_RSP_CMD_MASK | PACKET_REQ_LOAD_DATA,
 
   /**
-   * Result of PACKET_REQ_STATE
+   * Result of PACKET_REQ_STATE.
    * @returns wh_state_t
    */
   PACKET_RSP_STATE = _PACKET_RSP_CMD_MASK | PACKET_REQ_STATE,
@@ -72,18 +82,18 @@ enum PacketType : uint8_t {
    * Device status. Got every 30 seconds.
    * @returns wh_state_t
    */
-  PACKET_RSP_STATUS = 0x09,
+  PACKET_STATUS = 0x09,
 
   /**
    * Error executing previous command.
    * @returns wh_error_t
    */
-  PACKET_RSP_ERROR = 0x05,
+  PACKET_ERROR = 0x05,
 };
 
 struct ewh_mode_t {
   enum : uint8_t { SET_OPERATION = 0 };
-  enum : uint8_t { MODE_OFF = 0, MODE_700W = 1, MODE_1300W = 2, MODE_2000W = 3, MODE_NO_FROST = 4 } mode;
+  enum Mode : uint8_t { MODE_OFF = 0, MODE_700W = 1, MODE_1300W = 2, MODE_2000W = 3, MODE_NO_FROST = 4 } mode;
   uint8_t temperature;
 };
 
@@ -97,27 +107,29 @@ struct ewh_timer_t {
   enum : uint8_t { SET_OPERATION = 2 };
   uint8_t hours;
   uint8_t minutes;
-  uint8_t mode;  // from app it always 1
+  ewh_mode_t::Mode mode;  // from app it always 1
   uint8_t temperature;
 };
 
 // Bacteria Stop Technology.
 struct ewh_bst_t {
   enum : uint8_t { SET_OPERATION = 3 };
-  enum : uint8_t { STATE_OFF = 0, STATE_ON = 1 } state;
+  enum State : uint8_t { STATE_OFF = 0, STATE_ON = 1 } state;
 };
 
+// Response for PACKET_ERROR.
 struct ewh_error_t {
-  enum : uint8_t { CODE_BAD_CRC = 1, CODE_BAD_COMMAND = 2 } code;
+  enum Code : uint8_t { CODE_BAD_CRC = 1, CODE_BAD_COMMAND = 2 } code;
 };
 
-struct ewh_state_t {
-  enum : uint8_t {
+// Response for PACKET_STATUS.
+struct ewh_status_t {
+  enum State : uint8_t {
     STATE_OFF = 0,
     STATE_700W = 1,
     STATE_1300W = 2,
     STATE_2000W = 3,
-    STATE_TIMER = 4,  // hot water preparation mode
+    STATE_TIMER = 4,  // aka hot water preparation mode
     STATE_NO_FROST = 5
   } state;
   // temperature in celcius
@@ -127,34 +139,31 @@ struct ewh_state_t {
   uint8_t clock_minutes;
   uint8_t timer_hours;
   uint8_t timer_minutes;
-  uint8_t unknown;
-  ewh_bst_t bst;  // 0-off, 1-enabled, возможно другая цифра, когда режим активен.
+  uint8_t unknown;  // always 0
+  ewh_bst_t bst;
 };
 
-// Response 81
-// 00.00.00.00.00.11
-struct ewh_unknown81 {
-  uint8_t unknown00[5];  // always {0,0,0,0,0}
-  uint8_t unknown11;     // always 11
+// Response PACKET_REQ_STATE. Same as ewh_status_t.
+struct ewh_state_t : ewh_status_t {};
+
+// Response for PACKET_RSP_DEV_TYPE.
+struct ewh_dev_type_t {
+  uint32_t unknown;                       // always 0
+  enum : uint16_t { EWH = 0x1100 } type;  // always 0x1100
 };
 
-// Response 86
-// 01
-struct ewh_unknown86 {
-  uint8_t unknown01;  // always 01
+// Response for PACKET_REQ_SAVE_DATA.
+struct ewh_result_t {
+  enum : uint8_t { RESULT_OK = 1 };
+  uint8_t result;
 };
 
-// Response 87 and probably Request 06
-// 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-// 00.00.00.00.00.00.00.00.00.00.00.00.00.1A.07.32
-// 00.00.00.00.00.00.00.00.B9.00.00.00.00.00.00.00
-struct ewh_unknown87 {
-  uint8_t unknown00_8[8];  // always {0,0,0,0,0,0,0,0}
-  uint8_t unknownB9;       // 00 or B9
-  uint8_t unknown00_4[4];  // always {0,0,0,0}
-  uint8_t unknown1A;       // 00 or 1A
-  uint8_t unknown07;       // 00 or 07
-  uint8_t unknown32;       // 00 or 32
+// Response for PACKET_RSP_LOAD_DATA and request for PACKET_REQ_SAVE_DATA.
+struct ewh_data_t {
+  uint8_t data[16];
 };
 
 #pragma pack(pop)
+
+}  // namespace ewh
+}  // namespace esphome

@@ -1,7 +1,6 @@
-import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import climate
-from .. import EWH_SCHEMA, EWHComponent, ewh_ns, new_ewh
+from .. import EWH_COMPONENT_SCHEMA, EWHComponent, ewh_ns, new_ewh
 
 AUTO_LOAD = ["ewh"]
 
@@ -11,7 +10,7 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
     {
         cv.GenerateID(): cv.declare_id(EWHClimate),
     }
-).extend(EWH_SCHEMA)
+).extend(EWH_COMPONENT_SCHEMA)
 
 
 async def to_code(config):
