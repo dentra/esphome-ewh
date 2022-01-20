@@ -1,0 +1,159 @@
+# This package enables additional sensors showed in web interface.
+# Requires to be included after ewh-pkg-ewh.yaml
+# packages:
+#   web: github://dentra/esphome-ewh/ewh-pkg-web.yaml@$ewh_version
+# or if you like from local filesystem:
+#   web: !include ewh-pkg-web.yaml
+
+web_server:
+  # show internal sensors in UI
+  include_internal: true
+
+switch:
+  - platform: template
+    id: wh_state
+    internal: true
+    name: $name State
+    lambda: return id(whc).mode != ClimateMode::CLIMATE_MODE_OFF;
+    turn_on_action:
+      lambda: |-
+        ClimateCall cc = id(whc).make_call();
+        cc.set_mode(ClimateMode::CLIMATE_MODE_HEAT);
+        cc.perform();
+    turn_off_action:
+      lambda: |-
+        ClimateCall cc = id(whc).make_call();
+        cc.set_mode(ClimateMode::CLIMATE_MODE_OFF);
+        cc.perform();
+
+sensor:
+  # Add Current Temperature as sensor as internal sensor to show in web server UI
+  - platform: template
+    id: wh_current_temp
+    internal: true
+    name: $name Current Temperature
+    lambda: return id(whc).current_temperature;
+
+number:
+  - platform: template
+    id: wh_target_temp
+    internal: true
+    name: $name Target Temperature
+    min_value: 35
+    max_value: 70
+    step: 1
+    lambda: return id(whc).target_temperature;
+    set_action:
+      lambda: |-
+        ClimateCall cc = id(whc).make_call();
+        cc.set_target_temperature(x);
+        cc.perform();
+
+select:
+  - platform: template
+    id: wh_mode
+    internal: true
+    name: $name Mode
+    options: ["700 W", "1300 W", "2000 W", "No Frost", "Timer"]
+    lambda: return *id(whc).custom_preset;
+    set_action:
+      lambda: |-
+        if (x == "Timer") {
+          id(wh).set_timer(
+            strtol(id(wh_timer_hours).state.c_str(), nullptr, 10),
+            strtol(id(wh_timer_minutes).state.c_str(), nullptr, 10),
+            id(whc).target_temperature);
+        } else {
+          ClimateCall cc = id(whc).make_call();
+          cc.set_preset(x);
+          cc.perform();
+        }
+
+  - platform: template
+    internal: true
+    id: wh_timer_hours
+    name: $name Timer Hours
+    icon: mdi:timer-outline
+    entity_category: config
+    options:
+      - "00"
+      - "01"
+      - "02"
+      - "03"
+      - "04"
+      - "05"
+      - "06"
+      - "07"
+      - "08"
+      - "09"
+      - "10"
+      - "11"
+      - "12"
+      - "13"
+      - "14"
+      - "15"
+      - "16"
+      - "17"
+      - "18"
+      - "19"
+      - "20"
+      - "21"
+      - "22"
+      - "23"
+    set_action:
+      lambda: id(wh_timer_hours).publish_state(x);
+
+  - platform: template
+    internal: true
+    id: wh_timer_minutes
+    name: $name Timer Minutes
+    icon: mdi:timer-outline
+    entity_category: config
+    options:
+      - "00"
+      - "05"
+      - "10"
+      - "15"
+      - "20"
+      - "25"
+      - "30"
+      - "35"
+      - "40"
+      - "45"
+      - "50"
+      - "55"
+    set_action:
+      lambda: id(wh_timer_minutes).publish_state(x);
+
+ewh:
+  on_state:
+    then:
+      # faster update web ui
+      - lambda: |-
+          id(wh_current_temp).publish_state(state.current_temperature);
+          id(wh_target_temp).publish_state(state.target_temperature);
+          switch(state.state) {
+            case ewh::ewh_status_t::STATE_700W:
+              id(wh_state).publish_state(true);
+              id(wh_mode).publish_state("700 W");
+              break;
+            case ewh::ewh_status_t::STATE_1300W:
+              id(wh_state).publish_state(true);
+              id(wh_mode).publish_state("1300 W");
+              break;
+            case ewh::ewh_status_t::STATE_2000W:
+              id(wh_state).publish_state(true);
+              id(wh_mode).publish_state("2000 W");
+              break;
+            case ewh::ewh_status_t::STATE_TIMER:
+              id(wh_state).publish_state(true);
+              id(wh_mode).publish_state("Timer");
+              break;
+            case ewh::ewh_status_t::STATE_NO_FROST:
+              id(wh_state).publish_state(true);
+              id(wh_mode).publish_state("No Frost");
+              break;
+            default:
+              id(wh_state).publish_state(false);
+              break;
+          }

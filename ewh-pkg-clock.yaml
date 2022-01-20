@@ -1,0 +1,18 @@
+# This file enbles additional clock sensor for your dongle.
+# Enable it via package include:
+# packages:
+#   clock: github://dentra/esphome-ewh/ewh-pkg-clock.yaml@$ewh_version
+# or if you like from local filesystem:
+#   clock: !include ewh-pkg-clock.yaml
+
+text_sensor:
+  - platform: template
+    id: wh_clock
+    name: $name Clock
+    icon: mdi:clock
+    entity_category: diagnostic
+
+ewh:
+  on_state:
+    then:
+      - lambda: id(wh_clock).publish_state(str_snprintf("%02u:%02u", 5, state.clock_hours, state.clock_minutes));

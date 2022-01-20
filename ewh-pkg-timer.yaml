@@ -1,0 +1,18 @@
+# This file enbles additional timer sensor for your dongle.
+# Enable it via package include:
+# packages:
+#   timer: github://dentra/esphome-ewh/ewh-pkg-timer.yaml@$ewh_version
+# or if you like from local filesystem:
+#   timer: !include ewh-pkg-timer.yaml
+
+text_sensor:
+  - platform: template
+    id: wh_timer
+    name: $name Timer
+    icon: mdi:timer-outline
+    entity_category: diagnostic
+
+ewh:
+  on_state:
+    then:
+      - lambda: id(wh_timer).publish_state(str_snprintf("%02u:%02u", 5, state.timer_hours, state.timer_minutes));

@@ -1,167 +1,43 @@
+# !!!
+# !!! This file is for development purpose only !!!
+# !!!
 substitutions:
-  name: Water Heater
-  node_name: water-heater
+  # main prefix for all entities
+  name: "Water Heater"
+  # name of your node
+  node_name: "water-heater"
+  # use "esp12e" for iot-uni-dongle, "esp8285" for coolrf-heatstick
+  board: "esp12e"
+  # time platform: "sntp" or "homeassistant"
+  time_platform: "homeassistant"
+  # SSID of your wifi
+  wifi_ssid: !secret wifi_ssid
+  # password of your wifi
+  wifi_password: !secret wifi_password
+  # password for fallback wifi hotspot
+  wifi_ap_password: !secret wifi_ap_password
+  # version of ewh
   ewh_version: "master"
 
-esphome:
-  name: $node_name
-  platform: ESP8266
-  # use "esp12e" for iot-uni-dongle, "esp8285" for coolrf-heatstick
-  board: esp12e
-  project:
-    name: "dentra.ewh"
-    version: $ewh_version
-  on_boot:
-    then:
-      - lambda: id(wh).sync_clock();
+packages:
+  ewh: !include ewh-pkg-ewh.yaml
+  clock: !include ewh-pkg-clock.yaml
+  timer: !include ewh-pkg-timer.yaml
+  web: !include ewh-pkg-web.yaml # must follow before core and after ewh
+  cloud: !include ewh-pkg-cloud.yaml # must follow before core
+  core: !include ewh-pkg-core.yaml
 
 external_components:
-  # - source: github://dentra/esphome-ewh@$ewh_version
   - source: components
-
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-  ap:
-    ssid: "$name Fallback Hotspot"
-    password: "12345678"
-
-captive_portal:
-ota:
-  on_begin:
-    then:
-      - lambda: id(wh).cloud->disconnect();
-
-api:
-  services:
-    # configure HA available command to push binary command to the bioler.
-    # command must not contain any prefix or checksum, they will adds automatically.
-    # for example just write 081004 or 08 10 04 or even 08.10.04 to execute a query to get the current state.
-    - service: exec
-      variables:
-        data: string
-      then:
-        lambda: id(wh).exec(data);
-    # configure HA available command to set timer
-    - service: timer
-      variables:
-        hours: int
-        minutes: int
-        temperature: int
-      then:
-        lambda: id(wh).timer(hours, minutes, temperature);
-  reboot_timeout: 0s
-web_server:
-
-logger:
-  # Make sure logging is not using the serial port
-  baud_rate: 0
-  logs:
-    api: INFO
-    button: INFO
-    switch: INFO
-    sensor: INFO
-    climate: INFO
-    text_sensor: INFO
-    binary_sensor: INFO
-
-uart:
-  tx_pin: TX
-  rx_pin: RX
-  baud_rate: 9600
+  # - source: github://pr#2688
+  #   components: ["web_server"]
 
 time:
-  - platform: sntp
-    # just remove this string to detect timezone automatically
-    timezone: UTC-3
-    # at this section we configure timer to sync biolers internal clock with internet time
-    on_time:
-      # every 30 minutes
-      minutes: /30
-      # setting seconds to 0 is important part to exclude repetiteve calls every second
-      seconds: 0
-      then:
-        - lambda: id(wh).sync_clock();
+  platform: $time_platform
+  timezone: UTC-3
 
-climate:
-  - platform: ewh
-    id: wh
-    name: "$name"
-    cloud_mac: !secret device_mac
-    bst:
-      name: $name BST # Bacteria Stop Technology
-    clock:
-      name: $name Clock
-    timer:
-      name: $name Timer
-    #  write unknown commands to a debug sensor
-    debug:
-      name: $name Debug
-
-sensor:
-  - platform: wifi_signal
-    name: "$name WiFi Signal"
-
-  # uncomment to add Current Temperature as sensor
-  # - platform: template
-  #   name: $name Current Temperature
-  #   lambda: return id(wh).current_temperature;
-
-  # uncomment to add Target Temperature as sensor
-  # - platform: template
-  #   name: $name Target Temperature
-  #   lambda: return id(wh).target_temperature;
-
-button:
-  - platform: restart
-    name: "$name Restart"
-
-  - platform: template
-    name: "$name Cmd 01"
-    on_press:
-      - lambda: id(wh).exec(0x01);
-    entity_category: diagnostic
-
-  - platform: template
-    name: "$name Cmd 06"
-    on_press:
-      - lambda: id(wh).exec(0x06,{0,0,0,0,0,0,0,0,0,0,0,0,0,0x1a,0x07,0x32});
-    entity_category: diagnostic
-
-  - platform: template
-    name: "$name Cmd 07"
-    on_press:
-      - lambda: id(wh).exec(0x07);
-    entity_category: diagnostic
-
-  # this is a command to request for a boiler state
-  - platform: template
-    name: "$name Cmd 08"
-    on_press:
-      - lambda: id(wh).exec(0x08, {0x10, 0x04});
-    entity_category: diagnostic
-
-  # this command will sync internal boiler clock immediately
-  - platform: template
-    name: "$name Sync Clock"
-    on_press:
-      - lambda: id(wh).sync_clock();
-    entity_category: diagnostic
-
-  - platform: template
-    name: "$name Cloud connect"
-    on_press:
-      - lambda: id(wh).cloud->connect();
-    entity_category: diagnostic
-
-  - platform: template
-    name: "$name Cloud disconnect"
-    on_press:
-      - lambda: id(wh).cloud->disconnect();
-    entity_category: diagnostic
-
-binary_sensor:
-  - platform: template
-    name: "$name Cloud connected"
-    lambda: return id(wh).cloud->is_connected();
-    entity_category: diagnostic
+ewh_cloud:
+  mac: !secret cloud_mac
+  uid: !secret cloud_uid
+# web_server:
+#   version: 2

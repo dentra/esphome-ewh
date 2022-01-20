@@ -1,109 +1,37 @@
 substitutions:
-  name: Water Heater
-  node_name: water-heater
-  ewh_version: "2021.12.0"
+  # main prefix for all entities
+  name: "Water Heater"
+  # name of your node
+  node_name: "water-heater"
+  # use "esp12e" for iot-uni-dongle, "esp8285" for coolrf-heatstick, or your own if you know it
+  board: "esp12e"
+  # time platform: "sntp" or "homeassistant"
+  time_platform: "sntp"
+  # SSID of your wifi
+  wifi_ssid: !secret wifi_ssid
+  # password of your wifi
+  wifi_password: !secret wifi_password
+  # password for fallback wifi hotspot
+  wifi_ap_password: !secret wifi_ap_password
+  # version of ewh
+  ewh_version: "2022.1.0"
 
-esphome:
-  name: $node_name
-  platform: ESP8266
-  # use "esp12e" for iot-uni-dongle, "esp8285" for coolrf-heatstick
-  board: esp12e
-  project:
-    name: "dentra.ewh"
-    version: $ewh_version
-  on_boot:
-    then:
-      - lambda: id(wh).sync_clock();
+# please do not change packeages order it is very important, just comment/uncomment
+packages:
+  # required package, do not comment
+  ewh: github://dentra/esphome-ewh/ewh-pkg-ewh.yaml@$ewh_version
 
-external_components:
-  - source: github://dentra/esphome-ewh@$ewh_version
+  ## optional package, uncomment next line to enable additional diagnostic clock sensor
+  # clock: github://dentra/esphome-ewh/ewh-pkg-clock.yaml@$ewh_version
 
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-  ap:
-    ssid: "$name Fallback Hotspot"
-    password: "12345678"
+  ## optional package, uncomment next line to enable additional diagnostic timer sensor
+  # timer: github://dentra/esphome-ewh/ewh-pkg-timer.yaml@$ewh_version
 
-captive_portal:
-ota:
+  ## optional package, uncomment next line to enable standalone web ui
+  # web: github://dentra/esphome-ewh/ewh-pkg-web.yaml@$ewh_version
 
-api:
-  services:
-    # configure HA available command to push binary command to the bioler.
-    # command must not contain any prefix or checksum, they will adds automatically.
-    # for example just write 081004 or 08 10 04 or even 08.10.04 to execute a query to get the current state.
-    - service: exec
-      variables:
-        data: string
-      then:
-        lambda: id(wh).exec(data);
-    # configure HA available command to set timer
-    - service: timer
-      variables:
-        hours: int
-        minutes: int
-        temperature: int
-      then:
-        lambda: id(wh).timer(hours, minutes, temperature);
-  reboot_timeout: 0s
-web_server:
+  ## optional package, uncomment next line to enable experimental cloud support
+  # cloud: github://dentra/esphome-ewh/ewh-pkg-cloud.yaml@$ewh_version
 
-logger:
-  # Make sure logging is not using the serial port
-  baud_rate: 0
-  logs:
-    api: INFO
-    button: INFO
-    switch: INFO
-    sensor: INFO
-    climate: INFO
-    text_sensor: INFO
-    binary_sensor: INFO
-
-uart:
-  tx_pin: TX
-  rx_pin: RX
-  baud_rate: 9600
-
-time:
-  - platform: sntp
-    # just remove this string to detect timezone automatically
-    timezone: UTC-3
-    # at this section we configure timer to sync biolers internal clock with internet time
-    on_time:
-      # every 30 minutes
-      minutes: /30
-      # setting seconds to 0 is important part to exclude repetiteve calls every second
-      seconds: 0
-      then:
-        - lambda: id(wh).sync_clock();
-
-climate:
-  - platform: ewh
-    id: wh
-    name: "$name"
-    bst:
-      name: $name BST # Bacteria Stop Technology
-    clock:
-      name: $name Clock
-    timer:
-      name: $name Timer
-
-sensor:
-  - platform: wifi_signal
-    name: "$name WiFi Signal"
-
-  # uncomment to add Current Temperature as sensor
-  # - platform: template
-  #   name: $name Current Temperature
-  #   lambda: return id(wh).current_temperature;
-
-  # uncomment to add Target Temperature as sensor
-  # - platform: template
-  #   name: $name Target Temperature
-  #   lambda: return id(wh).target_temperature;
-
-button:
-  - platform: restart
-    name: "$name Restart"
+  # required package, do not comment
+  core: github://dentra/esphome-ewh/ewh-pkg-core.yaml@$ewh_version

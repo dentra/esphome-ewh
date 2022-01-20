@@ -1,0 +1,35 @@
+# This file enables cloud support to your dongle.
+# Enable it via package include:
+# packages:
+#   cloud: github://dentra/esphome-ewh/ewh-pkg-cloud.yaml@$ewh_version
+# or if you like from local filesystem:
+#   cloud: !include ewh-pkg-cloud.yaml
+
+ota:
+  on_begin:
+    then:
+      - lambda: id(cloud).disconnect();
+
+ewh_cloud:
+  id: cloud
+
+switch:
+  - platform: template
+    name: "$name Cloud"
+    icon: "mdi:cloud-outline"
+    lambda: return id(cloud).is_connected();
+    turn_on_action:
+      lambda: id(cloud).reconnect();
+    turn_off_action:
+      lambda: id(cloud).disconnect();
+    restore_state: true
+    entity_category: config
+
+  - platform: template
+    name: "$name Pair"
+    icon: "mdi:cloud-search-outline"
+    turn_on_action:
+      lambda: id(cloud).pair(true);
+    turn_off_action:
+      lambda: id(cloud).pair(false);
+    entity_category: config
