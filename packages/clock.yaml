@@ -1,9 +1,9 @@
 # This file enbles additional clock sensor for your dongle.
 # Enable it via package include:
 # packages:
-#   clock: github://dentra/esphome-ewh/ewh-pkg-clock.yaml@$ewh_version
+#   clock: github://dentra/esphome-ewh/packages/ewh-clock.yaml@$ewh_version
 # or if you like from local filesystem:
-#   clock: !include ewh-pkg-clock.yaml
+#   clock: !include packages/ewh-clock.yaml
 
 text_sensor:
   - platform: template

@@ -20,17 +20,15 @@ substitutions:
   ewh_version: "master"
 
 packages:
-  ewh: !include ewh-pkg-ewh.yaml
-  clock: !include ewh-pkg-clock.yaml
-  timer: !include ewh-pkg-timer.yaml
-  web: !include ewh-pkg-web.yaml # must follow before core and after ewh
-  cloud: !include ewh-pkg-cloud.yaml # must follow before core
-  core: !include ewh-pkg-core.yaml
+  ewh: !include packages/ewh.yaml
+  clock: !include packages/clock.yaml
+  timer: !include packages/timer.yaml
+  web: !include packages/web.yaml # must follow before core and after ewh
+  cloud: !include packages/cloud.yaml # must follow before core
+  core: !include packages/core.yaml
 
 external_components:
   - source: components
-  # - source: github://pr#2688
-  #   components: ["web_server"]
 
 time:
   platform: $time_platform
@@ -39,5 +37,4 @@ time:
 ewh_cloud:
   mac: !secret cloud_mac
   uid: !secret cloud_uid
-# web_server:
-#   version: 2
+

@@ -1,9 +1,9 @@
 # This package enables additional sensors showed in web interface.
-# Requires to be included after ewh-pkg-ewh.yaml
+# Requires to be included after ewh.yaml
 # packages:
-#   web: github://dentra/esphome-ewh/ewh-pkg-web.yaml@$ewh_version
+#   web: github://dentra/esphome-ewh/packages/ewh-web.yaml@$ewh_version
 # or if you like from local filesystem:
-#   web: !include ewh-pkg-web.yaml
+#   web: !include packages/web.yaml
 
 web_server:
   # show internal sensors in UI
