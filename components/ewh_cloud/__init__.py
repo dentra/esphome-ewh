@@ -17,7 +17,7 @@ EWHCloud = ewh.ewh_ns.class_("EWHCloud", cg.Component, ewh.EWHListener)
 
 def cloud_uid(value) -> list:
     "transform cloud uid to cloud key array"
-    value = str(cv.uint32_t(value))
+    value = f"{int(str(cv.uint32_t(value)))}:06d"
 
     parts = [value[i : i + 2] for i in range(0, len(value), 2)]
     if len(parts) != 3:
@@ -69,8 +69,10 @@ async def to_code(config):
     ewh_ = await cg.get_variable(config[ewh.CONF_EWH_ID])
     cg.add(ewh_.add_listener(var))
 
-    cg.add(var.set_mac(as_byte_array(config[CONF_MAC])))
-    cg.add(var.set_key(as_byte_array(config[CONF_UID], False)))
+    if CONF_MAC in config:
+        cg.add(var.set_mac(as_byte_array(config[CONF_MAC])))
+    if CONF_UID in config:
+        cg.add(var.set_key(as_byte_array(config[CONF_UID], False)))
     cg.add(var.set_host(config[CONF_HOST]))
     cg.add(var.set_port(config[CONF_PORT]))
 
