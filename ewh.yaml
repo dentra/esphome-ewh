@@ -14,7 +14,7 @@ substitutions:
   # password for fallback wifi hotspot
   wifi_ap_password: !secret wifi_ap_password
   # version of ewh
-  ewh_version: "2022.1.0"
+  ewh_version: "2022.1.2"
 
 # please do not change packeages order it is very important, just comment/uncomment
 packages:
