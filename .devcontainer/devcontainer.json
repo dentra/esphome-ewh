@@ -3,7 +3,7 @@
   "build": {
     "args": {
       // ESPHome version
-      "esphome_version": "2022.1.1",
+      "esphome_version": "2022.9.4",
       // additional APT dependicies
       "apt_deps": "bash-completion less libmbedtls-dev gdb"
     }
@@ -78,6 +78,8 @@
   "remoteUser": "vscode",
   "mounts": [
     "source=vscode-${containerWorkspaceFolderBasename},target=${containerWorkspaceFolder}/.esphome,type=volume",
+    "source=vscode-${containerWorkspaceFolderBasename},target=${containerWorkspaceFolder}/config/.esphome,type=volume",
     "source=vscode-${containerWorkspaceFolderBasename},target=${containerWorkspaceFolder}/.pio,type=volume",
+    "source=vscode-${containerWorkspaceFolderBasename},target=/esphome/.temp,type=volume"
   ]
 }

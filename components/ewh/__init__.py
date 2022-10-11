@@ -1,9 +1,8 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.components import switch, text_sensor, time, uart
+from esphome.components import switch, time, uart
 from esphome.const import (
-    CONF_ENTITY_CATEGORY,
     CONF_ICON,
     CONF_ID,
     CONF_ON_STATE,
@@ -13,7 +12,7 @@ from esphome.const import (
 )
 
 CODEOWNERS = ["@dentra"]
-AUTO_LOAD = ["switch", "text_sensor"]
+AUTO_LOAD = ["switch"]
 
 CONF_BST = "bst"
 CONF_EWH_ID = "ewh_id"
@@ -62,14 +61,9 @@ EWH_SCHEMA = cv.Schema(
 EWH_COMPONENT_SCHEMA = (
     cv.Schema(
         {
-            cv.Optional(CONF_ICON, default=ICON_WATER_BOILER): switch.icon,
-            cv.Optional(CONF_BST): switch.SWITCH_SCHEMA.extend(
-                {
-                    cv.GenerateID(): cv.declare_id(BSTSwitch),
-                    cv.Optional(
-                        CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_CONFIG
-                    ): cv.entity_category,
-                }
+            cv.Optional(CONF_ICON, default=ICON_WATER_BOILER): cv.icon,
+            cv.Optional(CONF_BST): switch.switch_schema(
+                BSTSwitch, entity_category=ENTITY_CATEGORY_CONFIG, block_inverted=True
             ),
             # cv.Optional(CONF_IDLE_TEMP_DROP, default=5): cv.uint8_t,
         }
@@ -96,6 +90,7 @@ async def new_ewh(config):
 
 
 async def to_code(config):
+
     urt = await cg.get_variable(config[uart.CONF_UART_ID])
     var = cg.new_Pvariable(config[CONF_ID], urt)
     await cg.register_component(var, config)

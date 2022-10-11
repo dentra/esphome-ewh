@@ -1,17 +1,38 @@
 # Electrolux Water Heater
 
+[![Version][version-shield]][version]
+[![License][license-shield]][license]
+[![ESPHome release][esphome-release-shield]][esphome-release]
 [![Open in Visual Studio Code][open-in-vscode-shield]][open-in-vscode]
+[![Telegram][telegram-shield]][telegram]
 [![Community Forum][community-forum-shield]][community-forum]
+[![Support author][donate-me-shield]][donate-me]
 [![PayPal.Me][paypal-me-shield]][paypal-me]
 
-[open-in-vscode-shield]: https://open.vscode.dev/badges/open-in-vscode.svg
-[open-in-vscode]: https://open.vscode.dev/dentra/esphome-components
+[version-shield]: https://img.shields.io/static/v1?label=Version&message=2022.1.2&color=green
+[version]: https://github.com/dentra/esphome-tion/releases/
+
+[license-shield]: https://img.shields.io/static/v1?label=License&message=MIT&color=orange&logo=license
+[license]: https://opensource.org/licenses/MIT
+
+[esphome-release-shield]: https://img.shields.io/static/v1?label=ESPHome&message=2022.9&color=green&logo=esphome
+[esphome-release]: https://github.com/esphome/esphome/releases/
+
+[open-in-vscode-shield]: https://img.shields.io/static/v1?label=+&message=Open+in+VSCode&color=blue&logo=visualstudiocode
+[open-in-vscode]: https://open.vscode.dev/dentra/esphome-tion
+
+[telegram-shield]: https://img.shields.io/static/v1?label=+&message=Telegram&logo=telegram
+[telegram]: https://t.me/joinchat/psTUBFY5E4swZTAy
 
 [community-forum-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Forum&style=popout&color=41bdf5&logo=HomeAssistant&logoColor=white
 [community-forum]: https://community.home-assistant.io/t/electrolux-water-heater-integration/368498
 
-[paypal-me-shield]: https://img.shields.io/static/v1.svg?label=%20&message=PayPal.Me&logo=paypal
+[donate-me-shield]: https://img.shields.io/static/v1?label=+&message=Donate
+[donate-me]: https://www.tinkoff.ru/cf/3dZPaLYDBAI
+
+[paypal-me-shield]: https://img.shields.io/static/v1?label=+&message=PayPal.Me&logo=paypal
 [paypal-me]: https://paypal.me/dentra0
+
 
 
 This is a ESPHome component to control Electrolux Water Heater and possibly other boilers (Ballu, Zanussi) using uart protocol.
