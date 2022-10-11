@@ -17,7 +17,7 @@ EWHCloud = ewh.ewh_ns.class_("EWHCloud", cg.Component, ewh.EWHListener)
 
 def cloud_uid(value) -> list:
     "transform cloud uid to cloud key array"
-    value = f"{int(str(cv.uint32_t(value)))}:06d"
+    value = f"{int(value):06d}"
 
     parts = [value[i : i + 2] for i in range(0, len(value), 2)]
     if len(parts) != 3:

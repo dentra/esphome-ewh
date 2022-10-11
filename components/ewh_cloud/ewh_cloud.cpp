@@ -132,7 +132,7 @@ void EWHCloud::connect() {
   if (this->tcp_->connect(this->host_.c_str(), this->port_)) {
     this->tcp_->onData(
         [](void *arg, AsyncClient *client, void *data, size_t size) {
-          reinterpret_cast<EWHCloud *>(arg)->on_tcp_data(static_cast<uint8_t *>(data), size);
+          static_cast<EWHCloud *>(arg)->on_tcp_data(static_cast<uint8_t *>(data), size);
         },
         this);
 
