@@ -1,0 +1,23 @@
+# platformio env
+pio_env=esp8266-arduino
+
+# project specific defines
+defines=(
+  USE_VPORT_BLE
+  USE_VPORT_UART
+)
+
+# project specific libraries
+lib_deps=(
+  "etlcpp/Embedded Template Library"
+  "https://github.com/me-no-dev/ESPAsyncUDP.git"
+)
+
+# project additional includes
+includes=(
+)
+
+# project external components
+external_components=(
+  "github://dentra/esphome-components@2023.2.0"
+)

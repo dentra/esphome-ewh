@@ -8,18 +8,25 @@ secrets.yaml
 /config
 /.esphome/
 /.pio/
+/.platformio/
+/config/
+/esphome
 /include/
 /src/
 /lib/
-/platformio.ini
-/partitions.csv
+
 CMakeListsPrivate.txt
 CMakeLists.txt
 
+/platformio.ini
+/partitions.csv
 /compile_commands.json
 /.clang_complete
 /.gcc-flags.json
 /.temp-clang-tidy.cpp
 /.clang-format
 /.clang-tidy
+/.editorconfig
 /.pylintrc
+/pylintrc
+/dependencies.lock
