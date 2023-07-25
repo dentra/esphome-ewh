@@ -59,7 +59,7 @@ switch:
       lambda: id(cloud).reconnect();
     turn_off_action:
       lambda: id(cloud).disconnect();
-    restore_state: true
+    restore_mode: RESTORE_DEFAULT_OFF
     entity_category: config
 ```
 

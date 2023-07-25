@@ -6,7 +6,8 @@
 [![Open in Visual Studio Code][open-in-vscode-shield]][open-in-vscode]
 [![Telegram][telegram-shield]][telegram]
 [![Community Forum][community-forum-shield]][community-forum]
-[![Support author][donate-me-shield]][donate-me]
+[![Support author][donate-tinkoff-shield]][donate-tinkoff]
+[![Support author][donate-boosty-shield]][donate-boosty]
 [![PayPal.Me][paypal-me-shield]][paypal-me]
 
 [version-shield]: https://img.shields.io/static/v1?label=Version&message=2022.1.2&color=green
@@ -15,7 +16,7 @@
 [license-shield]: https://img.shields.io/static/v1?label=License&message=MIT&color=orange&logo=license
 [license]: https://opensource.org/licenses/MIT
 
-[esphome-release-shield]: https://img.shields.io/static/v1?label=ESPHome&message=2022.9&color=green&logo=esphome
+[esphome-release-shield]: https://img.shields.io/static/v1?label=ESPHome&message=2023.7&color=green&logo=esphome
 [esphome-release]: https://github.com/esphome/esphome/releases/
 
 [open-in-vscode-shield]: https://img.shields.io/static/v1?label=+&message=Open+in+VSCode&color=blue&logo=visualstudiocode
@@ -27,8 +28,11 @@
 [community-forum-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Forum&style=popout&color=41bdf5&logo=HomeAssistant&logoColor=white
 [community-forum]: https://community.home-assistant.io/t/electrolux-water-heater-integration/368498
 
-[donate-me-shield]: https://img.shields.io/static/v1?label=+&message=Donate
-[donate-me]: https://www.tinkoff.ru/cf/3dZPaLYDBAI
+[donate-tinkoff-shield]: https://img.shields.io/static/v1?label=Donate&message=Tinkoff&color=yellow
+[donate-tinkoff]: https://www.tinkoff.ru/cf/3dZPaLYDBAI
+
+[donate-boosty-shield]: https://img.shields.io/static/v1?label=Donate&message=Boosty&color=red
+[donate-boosty]: https://boosty.to/dentra
 
 [paypal-me-shield]: https://img.shields.io/static/v1?label=+&message=PayPal.Me&logo=paypal
 [paypal-me]: https://paypal.me/dentra0
@@ -110,4 +114,5 @@ Please see instructions [here](components/ewh_cloud/README.md).
 When the water is heated to the required temperature, the boiler can enter to an idle mode (display shows 0 and temperature) but unfortunally I can't get this state yet. Obtaining this state will allow to make energy calculation. If you know the command that can be sent to the boiler to get this state - it will be superior. Please let me know it.
 
 ## Your thanks
-If this project was useful to you, you can [buy me](https://paypal.me/dentra0) a Cup of coffee :)
+If this project was useful to you, you can buy me a Cup of coffee via
+[Card2Card](https://www.tinkoff.ru/cf/3dZPaLYDBAI) or [PayPal](https://paypal.me/dentra0) :)
