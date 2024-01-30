@@ -1,6 +1,6 @@
 # This file enables main EWH services.
 external_components:
-  - source: github://dentra/esphome-ewh@$ewh_version
+  - source: github://dentra/esphome-ewh@$project_version
 
 logger:
   # Make sure logging is not using the serial port
@@ -11,32 +11,35 @@ uart:
   rx_pin: RX
   baud_rate: 9600
 
-api:
-  services:
-    # configure HA available command to push binary command to the bioler.
-    # command must not contain any prefix or checksum, they will adds automatically.
-    # for example just write 081004 or 08 10 04 or even 08.10.04 to execute a query to get the current state.
-    - service: exec
-      variables:
-        data: string
-      then:
-        lambda: id(wh).exec(data);
-    # configure HA available command to set timer
-    - service: timer
-      variables:
-        hours: int
-        minutes: int
-        temperature: int
-      then:
-        lambda: id(wh).set_timer(hours, minutes, temperature);
-  reboot_timeout: 0s
+# api:
+#   services:
+#     # configure HA available command to push binary command to the bioler.
+#     # command must not contain any prefix or checksum, they will adds automatically.
+#     # for example just write 081004 or 08 10 04 or even 08.10.04 to execute a query to get the current state.
+#     - service: exec
+#       variables:
+#         data: string
+#       then:
+#         lambda: id(aah).exec(data);
+#     # configure HA available command to set timer
+#     - service: timer
+#       variables:
+#         hours: int
+#         minutes: int
+#         temperature: int
+#       then:
+#         lambda: id(wh).set_timer(hours, minutes, temperature);
+#   reboot_timeout: 0s
+
+vport:
+  - platform: ewh
 
 ewh:
-  id: wh
 
 climate:
   - platform: ewh
     id: whc
-    name: "$name"
+    name: None # use friendly_name
+    # Optional, Bacteria Stop Technology switch
     bst:
-      name: $name BST # Bacteria Stop Technology
+      name: "BST"

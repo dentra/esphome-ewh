@@ -7,9 +7,13 @@ ARG pip_deps
 ARG workspace_dir
 ARG pio_dir=${workspace_dir}/.platformio
 
+ENV WORKSPACE_DIR=${workspace_dir}
+ENV PLATFORMIO_CORE_DIR="${pio_dir}"
+RUN mkdir -p "${pio_dir}"
+
 RUN export DEBIAN_FRONTEND=noninteractive \
  && apt-get update \
- && apt-get install -y --no-install-recommends sudo $apt_deps \
+ && apt-get install -y --no-install-recommends sudo bash-completion less $apt_deps \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -21,20 +25,11 @@ RUN pip3 --disable-pip-version-check --no-cache-dir install esphome==$esphome_ve
 #  && pio settings set check_platforms_interval 1000000 \
  && rm -rf /tmp/pip-tmp
 
-RUN echo "alias ll='ls -l'" >> /etc/bash.bashrc \
- && echo "alias la='ls -A'" >> /etc/bash.bashrc \
- && echo "alias l='ls -CF'" >> /etc/bash.bashrc
-
 RUN useradd -m -s /bin/bash -G sudo vscode \
  && echo "vscode ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/vscode \
  && chmod 0440 /etc/sudoers.d/vscode
 
-RUN mv /root/.platformio /home/vscode && chown -R vscode:vscode /home/vscode/.platformio /esphome /piolibs
-
-ENV PLATFORMIO_CORE_DIR="${pio_dir}"
-RUN mkdir -p "${pio_dir}"
-
-ENV WORKSPACE_DIR=${workspace_dir}
+RUN mv /root/.platformio /home/vscode && chown -R vscode:vscode /home/vscode/.platformio /esphome /piolibs "${pio_dir}"
 
 # Set up tmpfs volumes.
 VOLUME ["/tmp", "/run"]

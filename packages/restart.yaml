@@ -1,0 +1,4 @@
+button:
+  - platform: restart
+    name: Restart
+    entity_category: diagnostic

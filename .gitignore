@@ -30,3 +30,4 @@ CMakeLists.txt
 /.pylintrc
 /pylintrc
 /dependencies.lock
+/.build

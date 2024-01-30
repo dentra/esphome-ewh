@@ -1,7 +1,7 @@
 # This package enables additional sensors showed in web interface.
 # Requires to be included after ewh.yaml
 # packages:
-#   web: github://dentra/esphome-ewh/packages/ewh-web.yaml@$ewh_version
+#   web: github://dentra/esphome-ewh/packages/ewh-web.yaml@$project_branch
 # or if you like from local filesystem:
 #   web: !include packages/web.yaml
 
@@ -13,7 +13,7 @@ switch:
   - platform: template
     id: wh_state
     internal: true
-    name: $name State
+    name: State
     lambda: return id(whc).mode != ClimateMode::CLIMATE_MODE_OFF;
     turn_on_action:
       lambda: |-
@@ -31,14 +31,14 @@ sensor:
   - platform: template
     id: wh_current_temp
     internal: true
-    name: $name Current Temperature
+    name: Current Temperature
     lambda: return id(whc).current_temperature;
 
 number:
   - platform: template
     id: wh_target_temp
     internal: true
-    name: $name Target Temperature
+    name: Target Temperature
     min_value: 35
     max_value: 70
     step: 1
@@ -53,16 +53,21 @@ select:
   - platform: template
     id: wh_mode
     internal: true
-    name: $name Mode
+    name: Mode
     options: ["700 W", "1300 W", "2000 W", "No Frost", "Timer"]
     lambda: return *id(whc).custom_preset;
     set_action:
       lambda: |-
         if (x == "Timer") {
-          id(wh).set_timer(
+        #ifdef USE_TIME
+          id(whc).get_api()->set_timer(
             strtol(id(wh_timer_hours).state.c_str(), nullptr, 10),
             strtol(id(wh_timer_minutes).state.c_str(), nullptr, 10),
-            id(whc).target_temperature);
+            id(whc).target_temperature
+          );
+        #else
+          #pragma message("time platform is not configured, can't use timer")
+        #endif
         } else {
           ClimateCall cc = id(whc).make_call();
           cc.set_preset(x);
@@ -72,7 +77,7 @@ select:
   - platform: template
     internal: true
     id: wh_timer_hours
-    name: $name Timer Hours
+    name: Timer Hours
     icon: mdi:timer-outline
     entity_category: config
     options:
@@ -102,28 +107,19 @@ select:
       - "23"
     set_action:
       lambda: id(wh_timer_hours).publish_state(x);
+    optimistic: true
 
   - platform: template
     internal: true
     id: wh_timer_minutes
-    name: $name Timer Minutes
+    name: Timer Minutes
     icon: mdi:timer-outline
     entity_category: config
     options:
-      - "00"
-      - "05"
-      - "10"
-      - "15"
-      - "20"
-      - "25"
-      - "30"
-      - "35"
-      - "40"
-      - "45"
-      - "50"
-      - "55"
+      ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"]
     set_action:
       lambda: id(wh_timer_minutes).publish_state(x);
+    optimistic: true
 
 ewh:
   on_state:
@@ -133,23 +129,23 @@ ewh:
           id(wh_current_temp).publish_state(state.current_temperature);
           id(wh_target_temp).publish_state(state.target_temperature);
           switch(state.state) {
-            case ewh::ewh_status_t::STATE_700W:
+            case ewh::ewh_state_t::STATE_700W:
               id(wh_state).publish_state(true);
               id(wh_mode).publish_state("700 W");
               break;
-            case ewh::ewh_status_t::STATE_1300W:
+            case ewh::ewh_state_t::STATE_1300W:
               id(wh_state).publish_state(true);
               id(wh_mode).publish_state("1300 W");
               break;
-            case ewh::ewh_status_t::STATE_2000W:
+            case ewh::ewh_state_t::STATE_2000W:
               id(wh_state).publish_state(true);
               id(wh_mode).publish_state("2000 W");
               break;
-            case ewh::ewh_status_t::STATE_TIMER:
+            case ewh::ewh_state_t::STATE_TIMER:
               id(wh_state).publish_state(true);
               id(wh_mode).publish_state("Timer");
               break;
-            case ewh::ewh_status_t::STATE_NO_FROST:
+            case ewh::ewh_state_t::STATE_NO_FROST:
               id(wh_state).publish_state(true);
               id(wh_mode).publish_state("No Frost");
               break;

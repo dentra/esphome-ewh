@@ -1,14 +1,19 @@
 # This file enbles additional clock sensor for your dongle.
 # Enable it via package include:
 # packages:
-#   clock: github://dentra/esphome-ewh/packages/ewh-clock.yaml@$ewh_version
+#   clock: github://dentra/esphome-ewh/packages/ewh-clock.yaml@$project_branch
 # or if you like from local filesystem:
 #   clock: !include packages/ewh-clock.yaml
+substitutions:
+  time_platform: sntp
+
+time:
+  platform: $time_platform
 
 text_sensor:
   - platform: template
     id: wh_clock
-    name: $name Clock
+    name: "Clock"
     icon: mdi:clock
     entity_category: diagnostic
 

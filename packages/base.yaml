@@ -1,0 +1,49 @@
+substitutions:
+  project_branch: master
+  # project version
+  # project_version: $project_branch
+  project_version: 2024-master
+  # project git source
+  project_source: github://dentra/esphome-ewh@$project_branch
+  # project source refresh interval
+  project_source_refresh: 12h
+  # project idenitfier
+  project_id: rka
+  # node name
+  node_name: $project_id
+  # name for main entity and prefix for all others.
+  friendly_name: $node_name
+  # framework type settings: esp-idf or arduino
+  framework_type: arduino
+  # add suffix for node name to have one firmware for many devices.
+  node_add_mac_suffix: "true"
+
+esphome:
+  name: $node_name
+  friendly_name: $friendly_name
+  name_add_mac_suffix: $node_add_mac_suffix
+  project:
+    name: "dentra.$project_id"
+    version: "$project_version ($framework_type)"
+  min_version: "2023.12.6" # can't use substitutions here
+
+preferences:
+  flash_write_interval: 10min
+
+wifi:
+  ap:
+    ssid: "$friendly_name Hotspot"
+captive_portal:
+
+ota:
+logger:
+
+external_components:
+  - source: github://dentra/esphome-components@2023.2.0
+    components: [crash_info, etl, otax, vport, esp32_usb_dis]
+    refresh: 1d
+  - source: github://pr#3500
+    components: [web_server, web_server_idf, web_server_base, captive_portal]
+    refresh: 1d
+  - source: $project_source
+    refresh: $project_source_refresh

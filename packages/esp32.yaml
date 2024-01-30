@@ -1,0 +1,16 @@
+substitutions:
+  board: esp32dev
+  framework_type: esp-idf
+
+esphome:
+  platformio_options:
+    build_flags:
+      - -std=gnu++17
+    build_unflags:
+      - -std=gnu++11
+    lib_ldf_mode: "chain" # required for ESP32 AsyncUDP library search
+
+esp32:
+  board: $board
+  framework:
+    type: $framework_type
