@@ -18,14 +18,16 @@
 
 Some of request commands have corresponding response with `0x80` mask.
 
-## `01` - Possibly device identification
+## `01` -  Device/manufacturer identification
 
 Zero body.
 
-Returns response command `81` with fixed data.
+Returns response command `81` with device/manufacturer identification data.
 
 ```
-00.00.00.00.00.11
+00.00.00.00.00.11 Electrolux EWH
+00.00.00.00.00.04 Ballu BWH
+00.00.00.00.01.05 Electrolux ETS-16
 ```
 
 > This command is executed from cloud server every time it connects to device.
@@ -96,9 +98,9 @@ First byte is operation, one of:
 
 ## `05` - Error
 
-* code - `1` - invlid CRC, `2` - invalid command
+* code - `1` - no error, `1` - invlid CRC, `2` - invalid command
 
-## `09` - Device state
+## `09` - Device state (Electrolux)
 
 Received every 30 seconds.
 
@@ -109,14 +111,27 @@ Received every 30 seconds.
 * byte clock_minutes
 * byte timer_hours
 * byte timer_minutes
-* byte unknown
+* byte error - `0` - no error, `1` - temperature sensor error, `2-255` - other error
 * byte bst - `0` - off, `1` - enabled
+
+## `09` - Device state (Ballu)
+
+Received every 30 seconds.
+
+* byte state - `0` - off, `1` - 1300W, `2` - 2000W
+* byte current_temperature
+* byte target_temperature
+* byte unknown - known value 00
+* byte unknown - known value 00
+* byte unknown - known value 04
+* byte unknown - known value 00
+* byte error - `0` - no error, `1` - temperature sensor error, `2-255` - other error
 
 ## `88` - Device state
 
 Response to request of [08 command](#08---request-device-state).
 
-Structure is the same as in [09 command](#09--device-state).
+Structure is the same as in [09 command].
 
 
 
