@@ -1,0 +1,191 @@
+# Electrolux ETS-16
+
+device:
+  mac: !secret ets_mac
+  uid: !secret ets_uid
+  name: Electrolux ETS
+  # Default packet byte order: little-endian (default) or big-endian
+  byte_order: big-endian
+  unchanged:
+    uint8: 0x7F
+
+state:
+  dev_state:
+    type: data
+    data: "00 00 00 00 01 05"
+    show: false
+  storage:
+    type: data
+    data: "00 00 00 00 00 00 00 00 00 00 00 00 00"
+    show: false
+  storage_uid:
+    type: data
+    data: !lambda return uid_data(x.uid)
+    show: false
+  ok:
+    type: data
+    data: "01"
+    show: false
+  skip:
+    show: false
+  state:
+    eval: !lambda return onoff(x != 0)
+  unk01: # always 00
+  target_temp:
+    type: int16
+    data: 230
+    eval: !lambda return x * 0.1
+    unit: "°C"
+  air_temp:
+    type: int16
+    data: 200
+    eval: !lambda return x * 0.1
+    unit: "°C"
+  unk06: # always 00
+  unk07: # always 00
+  floor_temp: # ffa1 - disabled
+    type: int16
+    data: 180
+    eval: !lambda return x * 0.1
+    unit: "°C"
+  ctl_type: # выбор типа управления: 00 - датчик пола, 01 - датчик воздуха, 02 - датчик пола и воздуха
+    map:
+      0: Floor
+      1: Air
+      2: Floor & Air
+    unit: sensor
+  sens_type: # выбор датчика температуры: 02 - Electrolux 10, 03 - Raychem 13
+    data: 2
+    map:
+      0: Caleo 5
+      1: Teplolux 6.8
+      2: Electrolux 10
+      3: Raychem 13
+      4: Devi 15
+      5: Eberie 33
+    unit: kΩ
+  unk0C: # always 01
+    data: 0x01
+    format: "08b"
+  unk0D: # always c2
+    data: 0xc2
+    format: "08b"
+  unk0E: # always 00
+  antifreeze: # 00-off,32-on # вкл выкл антизамерзание
+  brightness: # percentage value 1e = 30 = 30%
+    data: 30
+    unit: "%"
+  unk11: # always 00
+  open_wnd_mode:
+    eval: !lambda return onoff(x != 0)
+  chld_lck: # 00-off,01-on # вкл выкл блокировка ручного режима
+    eval: !lambda return onoff(x == 0)
+
+commands:
+  dev_state:
+    request:
+      code: 0x01
+    response:
+      code: 0x81
+      struct:
+        - dev_state
+  data_save:
+    request:
+      code: 0x06
+    response:
+      code: 0x86
+      # 1 byte body, 01 means OK, 00 means ERROR. Later this data can be loaded via `07' command.
+      struct:
+        - ok
+  data_load:
+    request:
+      code: 0x07
+    response:
+      code: 0x87
+      struct:
+        - storage
+        - storage_uid
+  state_req:
+    request:
+      code: 0x08
+    response:
+      code: 0x88
+      struct: &state_rsp
+        - state
+        - unk01: 0
+        - target_temp
+        - air_temp
+        - unk06: 0
+        - unk07: 0
+        - floor_temp
+        - ctl_type
+        - sens_type
+        - unk0C: 1
+        - unk0D: 0xc2
+        - unk0E: 0
+        - antifreeze: 0
+        - brightness
+        - unk11: 0
+        - open_wnd_mode
+        - chld_lck
+  state_set:
+    request:
+      code: 0x0A
+      struct:
+        - state # 00
+        - unk01 # 01
+        - target_temp # 02
+        - skip: 0 # 04
+        - skip: 0 # 05
+        - air_temp # 06
+        - skip: 0 # 08
+        - skip: 0 # 09
+        - ctl_type # 0a
+        - sens_type # 0b
+        - skip: 1 # 0c
+        - skip: 0xc2 # 0d
+        - skip: 0 # 0e
+        - antifreeze: 0 # 0f
+        - brightness # 10
+        - unk11: 0 # 11
+        - open_wnd_mode # 12
+        - chld_lck # 13
+    response:
+      code: 0x8A
+      struct: *state_rsp
+
+tests:
+  - AT+NDBGL=0,0
+  - AT+APPVER
+  - AT+WSMAC
+
+  - aa 01 07 b2
+  # - aa 11 87 00 00 00 00 00  00 00 00 00 00 00 00 00  1b 37 5e f2
+
+  - aa 03 08 10 04 c9
+  # - aa 15 88 00 00 01 0e 00  fd 00 00 ff a1 01 02 01  c2 00 00 46 00 00 01 00
+
+  - aa 01 07 b2
+  # - aa 11 87 00 00 00 00 00  00 00 00 00 00 00 00 00  1b 37 5e f2
+
+  - aa 01 01 ac
+  # - aa 07 81 00 00 00 00 01  05 38
+
+  - aa 01 08 b3
+  # - aa 15 88 00 00 01 0e 00  fd 00 00 ff a1 01 02 01  c2 00 00 46 00 00 01 00
+
+  - aa 01 07 b2
+  # - aa 11 87 00 00 00 00 00  00 00 00 00 00 00 00 00  1b 37 5e f2
+
+  - aa 01 08 b3
+  # - aa 15 88 00 00 01 0e 00  fd 00 00 ff a1 01 02 01  c2 00 00 46 00 00 01 00
+
+  - aa 01 01 ac
+  # - aa 07 81 00 00 00 00 01  05 38
+
+  - aa 01 08 b3
+  # - aa 15 88 00 00 01 0e 00  fd 00 00 ff a1 01 02 01  c2 00 00 46 00 00 01 00
+  - aa 01 08 b3
+  # - aa 15 88 00 00 01 0e 00  fd 00 00 ff a1 01 02 01  c2 00 00 46 00 00 01 00
+
+  - aa150a 7f7f 010e 0000 0114 0000 7f7f 01c2 0000 7f00 7f7f 29
