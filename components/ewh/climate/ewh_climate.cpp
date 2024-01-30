@@ -12,18 +12,19 @@ static const std::string PRESET_MODE2 = "1300 W";
 static const std::string PRESET_MODE3 = "2000 W";
 static const std::string PRESET_NO_FROST = "No Frost";
 static const std::string PRESET_TIMER = "Timer";
+static const std::string &PRESET_DEFAULT = PRESET_MODE1;
 
 void EWHClimate::dump_config() {
-  LOG_CLIMATE("", "EWH Climate", this);
-  EWHComponent::dump_config();
+  LOG_CLIMATE("", "Electrolux Water Heater", this);
+  LOG_EWH();
 }
 
 ClimateTraits EWHClimate::traits() {
   auto traits = climate::ClimateTraits();
 
   traits.set_supports_current_temperature(true);
-  traits.set_visual_min_temperature(MIN_TEMPERATURE);
-  traits.set_visual_max_temperature(MAX_TEMPERATURE);
+  traits.set_visual_min_temperature(ewh::MIN_TEMPERATURE);
+  traits.set_visual_max_temperature(ewh::MAX_TEMPERATURE);
   traits.set_visual_temperature_step(1);
 
   traits.set_supported_modes({
@@ -81,12 +82,12 @@ void EWHClimate::control(const ClimateCall &call) {
 
   auto wh_mode = this->to_wh_mode_(this->mode, *this->custom_preset);
 
-  this->ewh_->set_mode(wh_mode, this->target_temperature);
+  this->api_->set_mode(wh_mode, this->target_temperature);
 
   // this->publish_state();
 }
 
-void EWHClimate::read(const ewh_status_t &status) {
+void EWHClimate::on_state(const ewh_state_t &status) {
   this->target_temperature = status.target_temperature;
   this->current_temperature = status.current_temperature;
 
@@ -94,7 +95,7 @@ void EWHClimate::read(const ewh_status_t &status) {
     this->mode = climate::CLIMATE_MODE_OFF;
     this->action = climate::CLIMATE_ACTION_OFF;
     if (!this->custom_preset.has_value()) {
-      this->custom_preset = PRESET_MODE1;
+      this->custom_preset = PRESET_DEFAULT;
     }
   } else {
     this->mode = climate::CLIMATE_MODE_HEAT;
@@ -110,12 +111,14 @@ void EWHClimate::read(const ewh_status_t &status) {
       this->custom_preset = PRESET_NO_FROST;
     } else if (status.state == ewh_state_t::STATE_TIMER) {
       this->custom_preset = PRESET_TIMER;
+    } else {
+      ESP_LOGW(TAG, "Unknown state %02X", status.state);
     }
   }
 
   this->publish_state();
 
-  EWHComponent::read(status);
+  EWHComponent::on_state(status);
 }
 
 // void EWHClimate::read(const ewh_state_t &state) {

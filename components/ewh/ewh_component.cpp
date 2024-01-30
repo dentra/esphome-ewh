@@ -8,10 +8,19 @@ namespace ewh {
 
 static const char *const TAG = "ewh.component";
 
-void EWHComponent::dump_config() {
-  LOG_SWITCH("  ", "BST Swtich", this->bst_);
-  auto dev_type = format_hex_pretty(reinterpret_cast<const uint8_t *>(&this->dev_type_), sizeof(this->dev_type_));
-  ESP_LOGCONFIG(TAG, "  Device Type: %s", dev_type.c_str());
+void EWHComponent::dump_config() { LOG_EWH(); }
+
+void EWHComponent::on_state(const ewh_state_t &state) {
+#ifdef USE_TIME
+  auto time = this->time_->now();
+  if (time.is_valid() && state.clock_hours != time.hour && state.clock_minutes != time.minute) {
+    this->api_->set_clock(time.hour, time.minute);
+  }
+#endif
+
+  if (this->bst_ != nullptr) {
+    this->bst_->publish_state(state.bst.state != ewh_bst_t::STATE_OFF);
+  }
 }
 
 // bool EWHComponent::is_idle_(const ewh_state_t &state) {
