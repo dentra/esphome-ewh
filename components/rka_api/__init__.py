@@ -2,8 +2,8 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
 from esphome.const import CONF_ID, CONF_ON_STATE, CONF_TRIGGER_ID
-from .. import vport  # pylint: disable=relative-beyond-top-level
 
+from .. import vport  # pylint: disable=relative-beyond-top-level
 
 CODEOWNERS = ["@dentra"]
 DEPENDENCIES = ["vport"]

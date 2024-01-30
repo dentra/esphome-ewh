@@ -1,17 +1,10 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.components import switch, time, uart, sensor
-from esphome.const import (
-    CONF_ICON,
-    CONF_ID,
-    CONF_ON_STATE,
-    CONF_TIME_ID,
-    CONF_TRIGGER_ID,
-    ENTITY_CATEGORY_CONFIG,
-)
-from .. import rka_api  # pylint: disable=relative-beyond-top-level
+from esphome.components import switch
+from esphome.const import CONF_ICON, CONF_ID, CONF_TIME_ID, ENTITY_CATEGORY_CONFIG
 
+from .. import rka_api  # pylint: disable=relative-beyond-top-level
 
 CODEOWNERS = ["@dentra"]
 AUTO_LOAD = ["rka_api", "switch"]

@@ -15,27 +15,18 @@ substitutions:
   # password for fallback wifi hotspot
   wifi_ap_password: !secret wifi_ap_password
   # version of ewh
-  project_version: "2022.11.0"
-
-external_components:
-  - source: components
+  project_version: "master"
 
 # please do not change packeages order it is very important, just comment/uncomment
 packages:
-  ## optional package, uncomment next line to enable standalone web ui
-  # web: github://dentra/esphome-ewh/packages/ets_web.yaml@$project_version
-  web: !include packages/ets_web.yaml
-
   wifi_signal: !include packages/wifi_signal.yaml
   restart: !include packages/restart.yaml
   uptime: !include packages/uptime.yaml
 
   debug: !include packages/debug.yaml
-
-  platform: !include packages/esp8266.yaml
   # required package, do not comment
-  #common: github://dentra/esphome-ewh/packages/core.yaml@$project_version
-  common: !include packages/common.yaml
+  common: !include packages/base.yaml
+  platform: !include packages/esp8266.yaml
 
 api:
 
@@ -58,11 +49,11 @@ vport:
   - platform: ets
 
 # Configure API
-ets:
-  on_state:
-    then:
-      lambda: |-
-        // do some stuff
+# ets:
+#   on_state:
+#     then:
+#       lambda: |-
+#         // do some stuff
 
 # Configure climate component
 climate:
@@ -71,15 +62,15 @@ climate:
     floor_temperature:
       name: "$name Floor Temperature"
 
-# Configure cloud support
-rka_cloud:
-  id: cloud
-  name: "Cloud"
-  pair:
-    name: "Pair"
-  mac: !secret cloud_mac_ets
-  # uid: !secret cloud_uid_ets
-
 button:
   - platform: factory_reset
     name: "Factory Reset"
+## Uncomment to enable cloud support
+# rka_cloud:
+#   id: cloud
+#   mac: !secret cloud_mac_ets
+#   uid: !secret cloud_uid_ets
+
+## Uncomment to enable web server
+# web_server:
+#   include_internal: true

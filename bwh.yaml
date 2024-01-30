@@ -29,21 +29,12 @@ packages:
       - packages/uptime.yaml
       ## Uncomment next line to enable additional restart button.
       - packages/restart.yaml
-      ## Uncomment next line to enable additional diagnostic clock sensor
-      # - packages/clock.yaml
-      ## Uncomment next line to enable additional diagnostic timer sensor
-      # - packages/timer.yaml
-      ## Uncomment next line to enable standalone web ui
-      # - packages/ewh_web.yaml
       ## optional package, uncomment next line to enable experimental cloud support
       # - packages/cloud.yaml
       # Required package, do not comment
       - packages/base.yaml
-      # Required package, replace with esp32.yaml if you use ESP32
+      # Required package, replace with esp32.yaml/esp32_s3.yaml if you use ESP32/ESP32S3
       - packages/esp8266.yaml
-
-time:
-  platform: sntp
 
 # Enable Home Assistant API connection.
 api:
@@ -70,18 +61,20 @@ uart:
   baud_rate: 9600
 
 vport:
-  - platform: ewh
+  - platform: bwh
 
 climate:
-  - platform: ewh
+  - platform: bwh
     id: whc
     name: None # use friendly_name
-    # Optional, Bacteria Stop Technology switch
-    bst:
-      name: "BST"
-## Uncomment to enable and override cloud support
+
+## Uncomment to enable cloud support
 # rka_cloud:
 #   id: cloud
 #   mac: !secret cloud_mac
 #   uid: !secret cloud_uid
+
+## Uncomment to enable web server
+# web_server:
+#   include_internal: true
 

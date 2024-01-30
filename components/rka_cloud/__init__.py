@@ -1,8 +1,8 @@
-import esphome.config_validation as cv
 import esphome.codegen as cg
-from esphome.core import CORE
+import esphome.config_validation as cv
 from esphome.components import switch
-from esphome.const import CONF_ID, ENTITY_CATEGORY_CONFIG
+from esphome.const import ENTITY_CATEGORY_CONFIG
+
 from .. import vport  # pylint: disable=relative-beyond-top-level
 
 CODEOWNERS = ["@dentra"]

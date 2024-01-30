@@ -1,5 +1,6 @@
 import esphome.config_validation as cv
 from esphome.components import climate
+
 from .. import ETS_COMPONENT_SCHEMA, ETSComponent, ets_ns, new_ets
 
 AUTO_LOAD = ["ets"]

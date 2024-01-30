@@ -2,18 +2,17 @@
 .DS_Store
 secrets.yaml
 
-/.vscode/
-
+/.vscode
+/.esphome
+/.pio
+/.platformio
+/.build
+/.venv
 /esphome
 /config
-/.esphome/
-/.pio/
-/.platformio/
-/config/
-/esphome
-/include/
-/src/
-/lib/
+/include
+/src
+/lib
 
 CMakeListsPrivate.txt
 CMakeLists.txt
@@ -30,4 +29,7 @@ CMakeLists.txt
 /.pylintrc
 /pylintrc
 /dependencies.lock
-/.build
+/*-dev.yaml
+
+/components/bct
+/components/vport
