@@ -3,9 +3,9 @@
 [![License][license-shield]][license]
 [![ESPHome release][esphome-release-shield]][esphome-release]
 [![Open in Visual Studio Code][open-in-vscode-shield]][open-in-vscode]
-[![Telegram][telegram-shield]][telegram]
 [![Community Forum][community-forum-shield]][community-forum]
-[![Support via card][donate-me-shield]][donate-me]
+[![Support author][donate-tinkoff-shield]][donate-tinkoff]
+[![Support author][donate-boosty-shield]][donate-boosty]
 [![PayPal.Me][paypal-me-shield]][paypal-me]
 
 [license-shield]: https://img.shields.io/static/v1?label=License&message=MIT&color=orange&logo=license
@@ -20,10 +20,10 @@
 [community-forum-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Forum&style=popout&color=41bdf5&logo=HomeAssistant&logoColor=white
 [community-forum]: https://community.home-assistant.io/t/electrolux-water-heater-integration/368498
 
-[donate-tinkoff-shield]: https://img.shields.io/static/v1?label=Поддержать+автора&message=Тинькофф&color=yellow
+[donate-tinkoff-shield]: https://img.shields.io/static/v1?label=Support+Author&message=Tinkoff&color=yellow
 [donate-tinkoff]: https://www.tinkoff.ru/cf/3dZPaLYDBAI
 
-[donate-boosty-shield]: https://img.shields.io/static/v1?label=Поддержать+автора&message=Boosty&color=red
+[donate-boosty-shield]: https://img.shields.io/static/v1?label=Support+Author&message=Boosty&color=red
 [donate-boosty]: https://boosty.to/dentra
 
 [paypal-me-shield]: https://img.shields.io/static/v1.svg?label=%20&message=PayPal.Me&logo=paypal
