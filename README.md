@@ -10,25 +10,18 @@
 
 [license-shield]: https://img.shields.io/static/v1?label=License&message=MIT&color=orange&logo=license
 [license]: https://opensource.org/licenses/MIT
-
 [esphome-release-shield]: https://img.shields.io/static/v1?label=ESPHome&message=2023.12.6&color=green&logo=esphome
 [esphome-release]: https://GitHub.com/esphome/esphome/releases/
-
 [open-in-vscode-shield]: https://img.shields.io/static/v1?label=+&message=Open+in+VSCode&color=blue&logo=visualstudiocode
 [open-in-vscode]: https://open.vscode.dev/dentra/esphome-components
-
 [community-forum-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Forum&style=popout&color=41bdf5&logo=HomeAssistant&logoColor=white
 [community-forum]: https://community.home-assistant.io/t/electrolux-water-heater-integration/368498
-
 [donate-tinkoff-shield]: https://img.shields.io/static/v1?label=Support+Author&message=Tinkoff&color=yellow
 [donate-tinkoff]: https://www.tinkoff.ru/cf/3dZPaLYDBAI
-
 [donate-boosty-shield]: https://img.shields.io/static/v1?label=Support+Author&message=Boosty&color=red
 [donate-boosty]: https://boosty.to/dentra
-
 [paypal-me-shield]: https://img.shields.io/static/v1.svg?label=%20&message=PayPal.Me&logo=paypal
 [paypal-me]: https://paypal.me/dentra0
-
 
 This is a ESPHome component to control Electrolux Water Heater (EWH), Ballu (BWH) and possibly Zanussi (ZWH) boilers using uart protocol.
 
@@ -39,20 +32,20 @@ Or look at fully opensource [iot-uni-dongle](https://github.com/dudanov/iot-uni-
 The communucation uart protocol is 100% reversed for EWH and partially for BWH. It is fully described at [reverse.md](reverse.md) file.
 
 At this moment the componet is build using climate platform and allows the following:
-* Control current temperature
-* Change target boil temperature
-* Change boil power to 700W (EWH only)
-* Change boil power to 1300W
-* Change boil power to 2000W
-* Change BST (Bacteria Stop technology) mode (EWH only, for BWH need help for reverse)
-* Sync and control internal clock (EWH only)
-* Set and start internal timer (EWH only)
-* Enter to "No Frost/Atifreeze" mode (EWH only)
 
+- Control current temperature
+- Change target boil temperature
+- Change boil power to 700W (EWH only)
+- Change boil power to 1300W
+- Change boil power to 2000W
+- Change BST (Bacteria Stop technology) mode (EWH only, for BWH need help for reverse)
+- Sync and control internal clock (EWH only)
+- Set and start internal timer (EWH only)
+- Enter to "No Frost/Atifreeze" mode (EWH only)
 
+> [!CAUTION]
 >
-> ## <font color="red">⚠️ WARNING: Everything you do is done entirely at your own peril and risk!**</font>
->
+> ## ⚠️ WARNING: Everything you do is done entirely at your own peril and risk!
 
 ## Build ESPHome firmware
 
@@ -64,7 +57,8 @@ substitutions:
   name: "Water Heater"
   # name of your node
   node_name: "water-heater"
-  # use "esp12e" for iot-uni-dongle, "esp8285" for coolrf-heatstick, or your own if you know it
+  # use "esp32-s3-devkitc-1" for Lilygo T-Dongle S3, "esp12e" for iot-uni-dongle,
+  # "esp8285" for coolrf-heatstick, or your own if you know it
   board: "esp12e"
   # time platform: "sntp" or "homeassistant"
   time_platform: "sntp"
@@ -76,36 +70,49 @@ substitutions:
   wifi_ap_password: !secret wifi_ap_password
   # version of ewh
   project_version: "master"
+  # UART configuration.
+  tx_pin: TX # use 19 for Lilygo T-Dongle S3
+  rx_pin: RX # use 20 for Lilygo T-Dongle S3
 
 # please do not change packeages order it is very important, just comment/uncomment
 packages:
-  # required package, do not comment
-  ewh: github://dentra/esphome-ewh/packages/ewh.yaml@$project_version
-
-  ## optional package, uncomment next line to enable additional diagnostic clock sensor
-  # clock: github://dentra/esphome-ewh/packages/clock.yaml@$project_version
-
-  ## optional package, uncomment next line to enable additional diagnostic timer sensor
-  # timer: github://dentra/esphome-ewh/packages/timer.yaml@$project_version
-
-  ## optional package, uncomment next line to enable standalone web ui
-  # web: github://dentra/esphome-ewh/packages/web.yaml@$project_version
-
-  ## optional package, uncomment next line to enable experimental cloud support
-  # cloud: github://dentra/esphome-ewh/packages/cloud.yaml@$project_version
-
-  # required package, do not comment
-  core: github://dentra/esphome-ewh/packages/core.yaml@$project_version
+  remote:
+    url: https://github.com/dentra/esphome-ewh
+    ref: master # cant use substitutions here
+    files:
+      ## Enable additional WiFi signal sensor. Comment next line to disable.
+      - packages/wifi_signal.yaml
+      ## Enable additional Uptime sensor. Comment next line to disable.
+      - packages/uptime.yaml
+      ## Uncomment next line to enable additional restart button.
+      - packages/restart.yaml
+      ## Uncomment next line to enable additional diagnostic clock sensor
+      # - packages/clock.yaml
+      ## Uncomment next line to enable additional diagnostic timer sensor
+      # - packages/timer.yaml
+      ## Uncomment next line to enable standalone web ui
+      # - packages/ewh_web.yaml
+      ## optional package, uncomment next line to enable experimental cloud support
+      # - packages/cloud.yaml
+      # Required package, do not comment
+      - packages/base.yaml
+      # Required package, replace with esp8266.yaml if you use ESP8266
+      - packages/esp32.yaml
 ```
 
 ## Expiremental cloud support
 
-Please see instructions [here](components/hf_lpt220/README.md).
+Please see instructions [here](components/rka_cloud/README.md).
 
 ## Help needed
 
-When the water is heated to the required temperature, the boiler can enter to an idle mode (display shows 0 and temperature) but unfortunally I can't get this state yet. Obtaining this state will allow to make energy calculation. If you know the command that can be sent to the boiler to get this state or even grab internal boiler firmware binary - it will be superior. Please let me know it.
+When the water is heated to the required temperature, the boiler can enter to an idle mode
+(display shows 0 and temperature) but unfortunally I can't get this state yet. Obtaining
+this state will allow to make energy calculation. If you know the command that can be sent
+to the boiler to get this state or even grab internal boiler firmware binary - it will
+be superior. Please let me know it.
 
 ## Your thanks
+
 If this project was useful to you, you can buy me a Cup of coffee via
 [Card2Card](https://www.tinkoff.ru/cf/3dZPaLYDBAI) or [PayPal](https://paypal.me/dentra0) :)

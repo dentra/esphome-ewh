@@ -3,8 +3,9 @@ substitutions:
   friendly_name: "Water Heater"
   # name of your node
   node_name: "water-heater"
-  # use "esp12e" for iot-uni-dongle, "esp8285" for coolrf-heatstick, or your own if you know it
-  board: "esp12e"
+  # use "esp32-s3-devkitc-1" for Lilygo T-Dongle S3, "esp12e" for iot-uni-dongle,
+  # "esp8285" for coolrf-heatstick, or your own if you know it
+  board: "esp32-s3-devkitc-1"
   # time platform: "sntp" or "homeassistant"
   time_platform: "sntp"
   # SSID of your wifi
@@ -14,8 +15,8 @@ substitutions:
   # password for fallback wifi hotspot
   wifi_ap_password: !secret wifi_ap_password
   # UART configuration.
-  tx_pin: TX
-  rx_pin: RX
+  tx_pin: 19 # use TX for iot-uni-dongle or coolrf-heatstick
+  rx_pin: 20 # use RX for iot-uni-dongle or coolrf-heatstick
 
 # please do not change packeages order it is very important, just comment/uncomment
 packages:
@@ -39,8 +40,8 @@ packages:
       # - packages/cloud.yaml
       # Required package, do not comment
       - packages/base.yaml
-      # Required package, replace with esp32.yaml if you use ESP32
-      - packages/esp8266.yaml
+      # Required package, replace with esp8266.yaml if you use ESP8266
+      - packages/esp32.yaml
 
 time:
   platform: sntp
