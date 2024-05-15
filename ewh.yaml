@@ -15,8 +15,8 @@ substitutions:
   # password for fallback wifi hotspot
   wifi_ap_password: !secret wifi_ap_password
   # UART configuration.
-  tx_pin: 19 # use TX for iot-uni-dongle or coolrf-heatstick
-  rx_pin: 20 # use RX for iot-uni-dongle or coolrf-heatstick
+  tx_pin: GPIO19 # use TX for iot-uni-dongle or coolrf-heatstick
+  rx_pin: GPIO20 # use RX for iot-uni-dongle or coolrf-heatstick
 
 # please do not change packeages order it is very important, just comment/uncomment
 packages:
@@ -38,10 +38,10 @@ packages:
       # - packages/ewh_web.yaml
       ## optional package, uncomment next line to enable experimental cloud support
       # - packages/cloud.yaml
-      # Required package, do not comment
+      # Required package, do not comment move or remove
       - packages/base.yaml
-      # Required package, replace with esp8266.yaml if you use ESP8266
-      - packages/esp32.yaml
+      # Required package, replace with esp32.yaml/esp8266.yaml if you use ESP32/ESP8266
+      - packages/esp32_s3.yaml
 
 time:
   platform: sntp
@@ -60,10 +60,6 @@ api:
 wifi:
   ssid: $wifi_ssid
   password: $wifi_password
-
-logger:
-  # Make sure logging is not using the serial port
-  baud_rate: 0
 
 uart:
   tx_pin: $tx_pin

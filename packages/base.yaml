@@ -8,7 +8,7 @@ substitutions:
   # project source refresh interval
   project_source_refresh: 12h
   # project idenitfier
-  project_id: rka
+  project_id: ewh
   # node name
   node_name: $project_id
   # name for main entity and prefix for all others.
@@ -37,6 +37,8 @@ captive_portal:
 
 ota:
 logger:
+  # Make sure logging is not using the serial port
+  baud_rate: 0
 
 external_components:
   - source: github://dentra/esphome-components@2023.2.0

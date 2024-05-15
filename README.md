@@ -49,7 +49,9 @@ At this moment the componet is build using climate platform and allows the follo
 
 ## Build ESPHome firmware
 
-Sample configuration (available for [download](ewh.yaml)):
+You can download and use example configurations for [EWH](ewh.yaml) and [BWH](bwh.yaml) for ZWH try EWH or BWH instead.
+
+Sample configuration:
 
 ```yaml
 substitutions:
@@ -71,8 +73,8 @@ substitutions:
   # version of ewh
   project_version: "master"
   # UART configuration.
-  tx_pin: TX # use 19 for Lilygo T-Dongle S3
-  rx_pin: RX # use 20 for Lilygo T-Dongle S3
+  tx_pin: GPIO19 # use TX for iot-uni-dongle or coolrf-heatstick
+  rx_pin: GPIO20 # use RX for iot-uni-dongle or coolrf-heatstick
 
 # please do not change packeages order it is very important, just comment/uncomment
 packages:
@@ -96,8 +98,8 @@ packages:
       # - packages/cloud.yaml
       # Required package, do not comment
       - packages/base.yaml
-      # Required package, replace with esp8266.yaml if you use ESP8266
-      - packages/esp32.yaml
+      # Required package, replace with esp32.yaml/esp8266.yaml if you use ESP32/ESP8266
+      - packages/esp32_s3.yaml
 ```
 
 ## Expiremental cloud support

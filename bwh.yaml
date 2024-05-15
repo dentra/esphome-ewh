@@ -14,9 +14,9 @@ substitutions:
   wifi_password: !secret wifi_password
   # password for fallback wifi hotspot
   wifi_ap_password: !secret wifi_ap_password
-  # UART configuration.
-  tx_pin: 19 # use TX for iot-uni-dongle or coolrf-heatstick
-  rx_pin: 20 # use RX for iot-uni-dongle or coolrf-heatstick
+  # UART configuration. Somtimes may need to swap tx/rx.
+  tx_pin: GPIO19 # use TX for iot-uni-dongle or coolrf-heatstick
+  rx_pin: GPIO20 # use RX for iot-uni-dongle or coolrf-heatstick
 
 # please do not change packeages order it is very important, just comment/uncomment
 packages:
@@ -51,10 +51,6 @@ api:
 wifi:
   ssid: $wifi_ssid
   password: $wifi_password
-
-logger:
-  # Make sure logging is not using the serial port
-  baud_rate: 0
 
 uart:
   tx_pin: $tx_pin
