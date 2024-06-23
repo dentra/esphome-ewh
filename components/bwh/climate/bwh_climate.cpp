@@ -69,33 +69,59 @@ void BWHClimate::control(const ClimateCall &call) {
 
   this->api_->set_mode(wh_mode, this->target_temperature);
 
-  // this->publish_state();
+  // is this actual for BWH?
+  this->defer([this]() { this->api_->request_state(); });
 }
 
 void BWHClimate::on_state(const bwh_state_t &status) {
-  this->target_temperature = status.target_temperature;
-  this->current_temperature = status.current_temperature;
+  bool has_changes{};
+  if (status.target_temperature < bwh::MIN_TEMPERATURE || status.target_temperature > bwh::MAX_TEMPERATURE) {
+    ESP_LOGW(TAG, "Target temperarue is out of range %u", status.target_temperature);
+    this->target_temperature.reset();
+  } else if (std::isnan(this->target_temperature) ||
+             static_cast<uint8_t>(this->target_temperature) != status.target_temperature) {
+    this->target_temperature = status.target_temperature;
+    has_changes = true;
+  }
 
-  if (status.state == bwh_state_t::STATE_OFF) {
-    this->mode = climate::CLIMATE_MODE_OFF;
-    this->action = climate::CLIMATE_ACTION_OFF;
-    if (!this->custom_preset.has_value()) {
-      this->custom_preset = PRESET_MODE2;
-    }
-  } else {
-    this->mode = climate::CLIMATE_MODE_HEAT;
+  if (std::isnan(this->current_temperature) ||
+      static_cast<uint8_t>(this->current_temperature) != status.current_temperature) {
+    this->current_temperature = status.current_temperature;
+    has_changes = true;
+  }
+
+  auto mode = climate::CLIMATE_MODE_OFF;
+  auto action = climate::CLIMATE_ACTION_OFF;
+  auto preset = this->custom_preset.value_or(PRESET_MODE2);
+  if (status.state != bwh_state_t::STATE_OFF) {
+    mode = climate::CLIMATE_MODE_HEAT;
     // if detect real heating then add ClimateAction::CLIMATE_ACTION_IDLE
-    this->action = climate::CLIMATE_ACTION_HEATING;
+    action = climate::CLIMATE_ACTION_HEATING;
     if (status.state == bwh_state_t::STATE_1300W) {
-      this->custom_preset = PRESET_MODE2;
+      preset = PRESET_MODE2;
     } else if (status.state == bwh_state_t::STATE_2000W) {
-      this->custom_preset = PRESET_MODE3;
+      preset = PRESET_MODE3;
     } else {
       ESP_LOGW(TAG, "Unknown state %02X", status.state);
     }
   }
 
-  this->publish_state();
+  if (mode != this->mode) {
+    this->mode = mode;
+    has_changes = true;
+  }
+  if (action != this->action) {
+    this->action = action;
+    has_changes = true;
+  }
+  if (!this->custom_preset.has_value() || *this->custom_preset != preset) {
+    this->custom_preset = preset;
+    has_changes = true;
+  }
+
+  if (has_changes) {
+    this->publish_state();
+  }
 
   BWHComponent::on_state(status);
 }
