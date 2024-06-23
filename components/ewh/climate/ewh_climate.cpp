@@ -37,7 +37,7 @@ ClimateTraits EWHClimate::traits() {
       // PRESET_TIMER,
   });
 
-  // traits.set_supports_action(true);
+  traits.set_supports_action(true);
 
   return traits;
 }
@@ -109,8 +109,9 @@ void EWHClimate::on_state(const ewh_state_t &status) {
   auto preset = this->custom_preset.value_or(PRESET_DEFAULT);
   if (status.state != ewh_state_t::STATE_OFF) {
     mode = climate::CLIMATE_MODE_HEAT;
-    // if detect real heating then add ClimateAction::CLIMATE_ACTION_IDLE
-    action = climate::CLIMATE_ACTION_HEATING;
+    const bool is_heating =
+        (static_cast<int>(status.target_temperature) - static_cast<int>(status.current_temperature)) > 1;
+    action = is_heating ? climate::CLIMATE_ACTION_HEATING : ClimateAction::CLIMATE_ACTION_IDLE;
     if (status.state == ewh_state_t::STATE_700W) {
       preset = PRESET_MODE1;
     } else if (status.state == ewh_state_t::STATE_1300W) {

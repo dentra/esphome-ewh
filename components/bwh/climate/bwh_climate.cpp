@@ -31,7 +31,7 @@ ClimateTraits BWHClimate::traits() {
       // PRESET_TIMER,
   });
 
-  // traits.set_supports_action(true);
+  traits.set_supports_action(true);
 
   return traits;
 }
@@ -92,11 +92,12 @@ void BWHClimate::on_state(const bwh_state_t &status) {
 
   auto mode = climate::CLIMATE_MODE_OFF;
   auto action = climate::CLIMATE_ACTION_OFF;
-  auto preset = this->custom_preset.value_or(PRESET_MODE2);
+  auto preset = this->custom_preset.value_or(PRESET_DEFAULT);
   if (status.state != bwh_state_t::STATE_OFF) {
     mode = climate::CLIMATE_MODE_HEAT;
-    // if detect real heating then add ClimateAction::CLIMATE_ACTION_IDLE
-    action = climate::CLIMATE_ACTION_HEATING;
+    const bool is_heating =
+        (static_cast<int>(status.target_temperature) - static_cast<int>(status.current_temperature)) > 1;
+    action = is_heating ? climate::CLIMATE_ACTION_HEATING : ClimateAction::CLIMATE_ACTION_IDLE;
     if (status.state == bwh_state_t::STATE_1300W) {
       preset = PRESET_MODE2;
     } else if (status.state == bwh_state_t::STATE_2000W) {
