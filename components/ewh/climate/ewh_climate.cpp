@@ -68,26 +68,26 @@ ewh_mode_t::Mode EWHClimate::to_wh_mode_(ClimateMode mode, const std::string &pr
 }
 
 void EWHClimate::control(const ClimateCall &call) {
-  if (call.get_target_temperature().has_value()) {
-    this->target_temperature = *call.get_target_temperature();
+  const auto mode = call.get_mode().value_or(this->mode);
+  const auto preset = call.get_custom_preset().value_or(*this->custom_preset);
+  const auto wh_mode = this->to_wh_mode_(mode, preset);
+  const auto temp = call.get_target_temperature().value_or(this->target_temperature);
+  if (std::isnan(temp)) {
+    ESP_LOGW(TAG, "No target temperature detected");
+  } else {
+    this->api_->set_mode(wh_mode, temp);
   }
-
-  if (call.get_mode().has_value()) {
-    this->mode = *call.get_mode();
+  // special case to allow achange present when is off
+  if (wh_mode == ewh_mode_t::MODE_OFF && call.get_custom_preset().has_value()) {
+    this->custom_preset = preset;
   }
-
-  if (call.get_custom_preset().has_value()) {
-    this->custom_preset = *call.get_custom_preset();
-  }
-
-  auto wh_mode = this->to_wh_mode_(this->mode, *this->custom_preset);
-
-  this->api_->set_mode(wh_mode, this->target_temperature);
   // set_mode do not return value, so we need to request state
-  this->defer([this]() { this->api_->request_state(); });
+  this->set_timeout(100, [this]() { this->api_->request_state(); });
 }
 
 void EWHClimate::on_state(const ewh_state_t &status) {
+  ESP_LOGV(TAG, "Got st: %u, tT: %u, cT=%u", status.state, status.target_temperature, status.current_temperature);
+
   bool has_changes{};
   if (status.target_temperature < ewh::MIN_TEMPERATURE || status.target_temperature > ewh::MAX_TEMPERATURE) {
     ESP_LOGW(TAG, "Target temperarue is out of range %u", status.target_temperature);
@@ -106,7 +106,7 @@ void EWHClimate::on_state(const ewh_state_t &status) {
 
   auto mode = climate::CLIMATE_MODE_OFF;
   auto action = climate::CLIMATE_ACTION_OFF;
-  auto preset = this->custom_preset.value_or(PRESET_DEFAULT);
+  auto preset = *this->custom_preset;
   if (status.state != ewh_state_t::STATE_OFF) {
     mode = climate::CLIMATE_MODE_HEAT;
     const bool is_heating =
@@ -135,7 +135,7 @@ void EWHClimate::on_state(const ewh_state_t &status) {
     this->action = action;
     has_changes = true;
   }
-  if (!this->custom_preset.has_value() || *this->custom_preset != preset) {
+  if (preset != *this->custom_preset) {
     this->custom_preset = preset;
     has_changes = true;
   }

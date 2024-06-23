@@ -53,31 +53,28 @@ bwh_mode_t::Mode BWHClimate::to_wh_mode_(ClimateMode mode, const std::string &pr
 }
 
 void BWHClimate::control(const ClimateCall &call) {
-  if (call.get_target_temperature().has_value()) {
-    this->target_temperature = *call.get_target_temperature();
+  const auto mode = call.get_mode().value_or(this->mode);
+  const auto preset = call.get_custom_preset().value_or(*this->custom_preset);
+  const auto wh_mode = this->to_wh_mode_(mode, preset);
+  const auto temp = call.get_target_temperature().value_or(this->target_temperature);
+  if (std::isnan(temp)) {
+    ESP_LOGW(TAG, "No target temperature detected");
+  } else {
+    this->api_->set_mode(wh_mode, temp);
   }
-
-  if (call.get_mode().has_value()) {
-    this->mode = *call.get_mode();
+  // special case to allow achange present when is off
+  if (wh_mode == bwh_mode_t::MODE_OFF && call.get_custom_preset().has_value()) {
+    this->custom_preset = preset;
   }
-
-  if (call.get_custom_preset().has_value()) {
-    this->custom_preset = *call.get_custom_preset();
-  }
-
-  auto wh_mode = this->to_wh_mode_(this->mode, *this->custom_preset);
-
-  this->api_->set_mode(wh_mode, this->target_temperature);
-
   // is this actual for BWH?
-  this->defer([this]() { this->api_->request_state(); });
+  this->set_timeout(100, [this]() { this->api_->request_state(); });
 }
 
 void BWHClimate::on_state(const bwh_state_t &status) {
   bool has_changes{};
   if (status.target_temperature < bwh::MIN_TEMPERATURE || status.target_temperature > bwh::MAX_TEMPERATURE) {
     ESP_LOGW(TAG, "Target temperarue is out of range %u", status.target_temperature);
-    this->target_temperature.reset();
+    this->target_temperature = NAN;
   } else if (std::isnan(this->target_temperature) ||
              static_cast<uint8_t>(this->target_temperature) != status.target_temperature) {
     this->target_temperature = status.target_temperature;
@@ -92,7 +89,7 @@ void BWHClimate::on_state(const bwh_state_t &status) {
 
   auto mode = climate::CLIMATE_MODE_OFF;
   auto action = climate::CLIMATE_ACTION_OFF;
-  auto preset = this->custom_preset.value_or(PRESET_DEFAULT);
+  auto preset = *this->custom_preset;
   if (status.state != bwh_state_t::STATE_OFF) {
     mode = climate::CLIMATE_MODE_HEAT;
     const bool is_heating =
@@ -115,7 +112,7 @@ void BWHClimate::on_state(const bwh_state_t &status) {
     this->action = action;
     has_changes = true;
   }
-  if (!this->custom_preset.has_value() || *this->custom_preset != preset) {
+  if (preset != *this->custom_preset) {
     this->custom_preset = preset;
     has_changes = true;
   }
