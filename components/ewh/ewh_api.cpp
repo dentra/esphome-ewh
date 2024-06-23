@@ -39,10 +39,16 @@ void EWHApi::set_bst(bool value) {
 
 void EWHApi::set_mode(const ewh_mode_t &mode) {
   ESP_LOGD(TAG, "Set mode to %u, temperature %u", mode.mode, mode.temperature);
+  if (mode.temperature < MIN_TEMPERATURE || mode.temperature > MAX_TEMPERATURE) {
+    ESP_LOGW(TAG, "Mode temperature must be in [%u:%u] range", MIN_TEMPERATURE, MAX_TEMPERATURE);
+    return;
+  }
   this->write_op(mode);
 }
 
 void EWHApi::set_timer(const ewh_timer_t &timer) {
+  ESP_LOGD(TAG, "Set timer at %02u:%02u, mode %u, temperature %u", timer.hours, timer.minutes, timer.mode,
+           timer.temperature);
   if (timer.hours > 23) {
     ESP_LOGW(TAG, "Timer hours must be in [0:23] range");
     return;
@@ -55,12 +61,11 @@ void EWHApi::set_timer(const ewh_timer_t &timer) {
     ESP_LOGW(TAG, "Timer temperature must be in [%u:%u] range", MIN_TEMPERATURE, MAX_TEMPERATURE);
     return;
   }
-  ESP_LOGD(TAG, "Set timer at %02u:%02u, mode %u, temperature %u", timer.hours, timer.minutes, timer.mode,
-           timer.temperature);
   this->write_op(timer);
 }
 
 void EWHApi::set_clock(const ewh_clock_t &clock) {
+  ESP_LOGD(TAG, "Set clock to %02u:%02u", clock.hours, clock.minutes);
   if (clock.hours > 23) {
     ESP_LOGW(TAG, "Clock hours must be in [0:23] range");
     return;
@@ -69,7 +74,6 @@ void EWHApi::set_clock(const ewh_clock_t &clock) {
     ESP_LOGW(TAG, "Clock minutes must be in [0:59] range");
     return;
   }
-  ESP_LOGD(TAG, "Set clock to %02u:%02u", clock.hours, clock.minutes);
   this->write_op(clock);
 }
 

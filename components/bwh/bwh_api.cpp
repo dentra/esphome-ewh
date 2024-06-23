@@ -19,6 +19,10 @@ void BWHApi::set_mode(bwh_mode_t::Mode mode, uint8_t target_temperature) {
 
 void BWHApi::set_mode(const bwh_mode_t &mode) {
   ESP_LOGD(TAG, "Set mode to %u, temperature %u", mode.mode, mode.temperature);
+  if (mode.temperature < MIN_TEMPERATURE || mode.temperature > MAX_TEMPERATURE) {
+    ESP_LOGW(TAG, "Mode temperature must be in [%u:%u] range", MIN_TEMPERATURE, MAX_TEMPERATURE);
+    return;
+  }
   this->write_op(mode);
 }
 
