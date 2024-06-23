@@ -7,9 +7,9 @@ namespace ewh {
 
 static const char *const TAG = "ewh.climate";
 
-static const std::string PRESET_MODE1 = "700 W";
-static const std::string PRESET_MODE2 = "1300 W";
-static const std::string PRESET_MODE3 = "2000 W";
+static const std::string PRESET_MODE1 = "0.7 kW";
+static const std::string PRESET_MODE2 = "1.3 kW";
+static const std::string PRESET_MODE3 = "2.0 kW";
 static const std::string PRESET_NO_FROST = "No Frost";
 static const std::string PRESET_TIMER = "Timer";
 static const std::string &PRESET_DEFAULT = PRESET_MODE1;

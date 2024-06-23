@@ -7,8 +7,8 @@ namespace bwh {
 
 static const char *const TAG = "bwh.climate";
 
-static const std::string PRESET_MODE2 = "1300 W";
-static const std::string PRESET_MODE3 = "2000 W";
+static const std::string PRESET_MODE2 = "1.3 kW";
+static const std::string PRESET_MODE3 = "2.0 kW";
 static const std::string &PRESET_DEFAULT = PRESET_MODE2;
 
 void BWHClimate::dump_config() { LOG_CLIMATE("", "Ballu Water Heater", this); }
