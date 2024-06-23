@@ -25,7 +25,7 @@ esphome:
   project:
     name: "dentra.$project_id"
     version: "$project_version ($framework_type)"
-  min_version: "2023.12.6" # can't use substitutions here
+  min_version: "2023.6.1" # can't use substitutions here
 
 preferences:
   flash_write_interval: 10min
@@ -36,6 +36,8 @@ wifi:
 captive_portal:
 
 ota:
+  - platform: esphome
+
 logger:
   # Make sure logging is not using the serial port
   baud_rate: 0

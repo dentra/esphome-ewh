@@ -2,12 +2,6 @@ substitutions:
   board: esp01_1m
   restore_from_flash: "true"
 
-esphome:
-  platformio_options:
-    build_flags:
-      - -DVTABLES_IN_FLASH
-      - -DNDEBUG
-
 esp8266:
   board: $board
   restore_from_flash: $restore_from_flash
