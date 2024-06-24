@@ -24,7 +24,9 @@ void EWHComponent::on_state(const ewh_state_t &state) {
 #endif
 #ifdef USE_SENSOR
   if (this->error_code_) {
-    this->error_code_->publish_state(state.error);
+    if (std::isnan(this->error_code_->state) || static_cast<uint8_t>(this->error_code_->state) != state.error) {
+      this->error_code_->publish_state(state.error);
+    }
   }
 #endif
 }
