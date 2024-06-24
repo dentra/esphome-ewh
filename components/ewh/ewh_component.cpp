@@ -17,10 +17,16 @@ void EWHComponent::on_state(const ewh_state_t &state) {
     this->api_->set_clock(time.hour, time.minute);
   }
 #endif
-
+#ifdef USE_SWITCH
   if (this->bst_ != nullptr) {
     this->bst_->publish_state(state.bst.state != ewh_bst_t::STATE_OFF);
   }
+#endif
+#ifdef USE_SENSOR
+  if (this->error_code_) {
+    this->error_code_->publish_state(state.error);
+  }
+#endif
 }
 
 // bool EWHComponent::is_idle_(const ewh_state_t &state) {

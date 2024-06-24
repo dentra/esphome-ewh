@@ -8,6 +8,10 @@
 #include "esphome/core/helpers.h"
 #include "esphome/core/hal.h"
 
+#ifndef RKA_DUMP
+#define RKA_DUMP ESP_LOGV
+#endif
+
 namespace esphome {
 namespace rka_api {
 
@@ -85,7 +89,7 @@ class UartFrameIO {
         if (uart->read_array(&frame->data[this->rx_.size], sizeof(crc_type))) {
           ESP_LOGVV(TAG, "Read CRC: 0x%02X", frame->data[this->rx_.size] & 0xFF);
           if (this->check_crc(frame)) {
-            ESP_LOGV(TAG, "RX: %s", format_hex_pretty(this->rx_.data, this->rx_.size + sizeof(rx_frame_t)).c_str());
+            RKA_DUMP(TAG, "RX: %s", format_hex_pretty(this->rx_.data, this->rx_.size + sizeof(rx_frame_t)).c_str());
             if (this->reader_) {
               this->reader_(frame->data, frame->size);
             }
@@ -135,7 +139,7 @@ class UartFrameIO {
       }
     }
     s += format_hex_pretty(reinterpret_cast<uint8_t *>(&crc), sizeof(crc));
-    ESP_LOGV(TAG, "TX: %s (%zu)", s.c_str(), sizeof(rx_frame_t) + size);
+    RKA_DUMP(TAG, "TX: %s (%zu)", s.c_str(), sizeof(rx_frame_t) + size);
 #endif
   }
 
