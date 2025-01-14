@@ -131,15 +131,15 @@ ewh:
           switch(state.state) {
             case ewh::ewh_state_t::STATE_700W:
               id(wh_state).publish_state(true);
-              id(wh_mode).publish_state("700 W");
+              id(wh_mode).publish_state("0.7 kW");
               break;
             case ewh::ewh_state_t::STATE_1300W:
               id(wh_state).publish_state(true);
-              id(wh_mode).publish_state("1300 W");
+              id(wh_mode).publish_state("1.3 kW");
               break;
             case ewh::ewh_state_t::STATE_2000W:
               id(wh_state).publish_state(true);
-              id(wh_mode).publish_state("2000 W");
+              id(wh_mode).publish_state("2.0 kW");
               break;
             case ewh::ewh_state_t::STATE_TIMER:
               id(wh_state).publish_state(true);
