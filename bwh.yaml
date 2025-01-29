@@ -6,8 +6,6 @@ substitutions:
   # use "esp32-s3-devkitc-1" for Lilygo T-Dongle S3, "esp12e" for iot-uni-dongle,
   # "esp8285" for coolrf-heatstick, or your own if you know it
   board: "esp32-s3-devkitc-1"
-  # time platform: "sntp" or "homeassistant"
-  time_platform: "sntp"
   # SSID of your wifi
   wifi_ssid: !secret wifi_ssid
   # password of your wifi
@@ -37,7 +35,7 @@ packages:
       # Required package, replace with esp8266.yaml if you use ESP8266
       - packages/esp32.yaml
 
-# Enable Home Assistant API connection.
+# Enable Home Assistant API connection. Please comment if you plan to use MQTT.
 api:
 
 # Uncomment to enable MQTT connecion.
