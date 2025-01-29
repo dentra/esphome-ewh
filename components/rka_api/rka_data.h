@@ -122,7 +122,7 @@ struct rka_dev_type_t {
     RSP_FRAME_TYPE = PACKET_RSP_DEV_TYPE,
   };
   uint32_t unknown;  // always 0
-  enum : uint16_t { EWH = 0x1100, BWH = 0x0400, ETS = 0x0501 } type;
+  enum : uint16_t { EWH = 0x1100, BWH = 0x0400, ETS = 0x0501, EHU = 0x0700 } type;
 };
 
 // Response for PACKET_REQ_SAVE_DATA.

@@ -33,3 +33,7 @@ CMakeLists.txt
 
 /components/bct
 /components/vport
+/components/nvs
+/components/settings
+/components/declaration
+/fw

@@ -1,0 +1,89 @@
+substitutions:
+  # main prefix for all entities
+  friendly_name: "Humidifier"
+  # name of your node
+  node_name: "humidifier"
+  # use "esp32-s3-devkitc-1" for Lilygo T-Dongle S3, "esp12e" for iot-uni-dongle,
+  # "esp8285" for coolrf-heatstick, or your own if you know it
+  board: "esp32-s3-devkitc-1"
+  # time platform: "sntp" for MQTT or "homeassistant" for API
+  time_platform: "sntp"
+  # SSID of your wifi
+  wifi_ssid: !secret wifi_ssid
+  # password of your wifi
+  wifi_password: !secret wifi_password
+  # password for fallback wifi hotspot
+  wifi_ap_password: !secret wifi_ap_password
+  # UART configuration. Sometimes may need to swap tx/rx.
+  tx_pin: GPIO19 # use TX for iot-uni-dongle or coolrf-heatstick
+  rx_pin: GPIO20 # use RX for iot-uni-dongle or coolrf-heatstick
+
+  project_source: ./components
+
+# please do not change packages order it is very important, just comment/uncomment
+packages:
+  remote:
+    refresh: 0s
+    url: https://github.com/dentra/esphome-ewh
+    ref: master # cant use substitutions here
+    files:
+      ## Enable additional WiFi signal sensor. Comment next line to disable.
+      - packages/wifi_signal.yaml
+      ## Enable additional Uptime sensor. Comment next line to disable.
+      - packages/uptime.yaml
+      ## Uncomment next line to enable additional restart button.
+      - packages/restart.yaml
+      ## optional package, uncomment next line to enable experimental cloud support
+      # - packages/cloud.yaml
+      # Required package, do not comment
+      - packages/base.yaml
+      # Required package, replace with esp8266.yaml if you use ESP8266
+      - packages/esp32.yaml
+
+# Enable Home Assistant API connection. Please comment if you plan to use MQTT.
+api:
+
+# Uncomment to enable MQTT connecion.
+# mqtt:
+#   broker: !secret mqtt_borker
+#   username: !secret mqtt_username
+#   password: !secret mqtt_password
+
+# WiFi hotspot configuration.
+# Comment next 3 lines to enable manual WiFi conviguration via access point.
+wifi:
+  ssid: $wifi_ssid
+  password: $wifi_password
+
+time:
+  - platform: $time_platform
+
+uart:
+  tx_pin: $tx_pin
+  rx_pin: $rx_pin
+  baud_rate: 9600
+
+vport:
+  - platform: ehu
+
+fan:
+  - platform: ehu
+    name: Fan
+    temperature: Temperature
+    humidity: Humidity
+    warm_mist: Warm Mist
+    uv: UV
+    ionizer: Ionizer
+    lock: Lock
+    sound: Sound
+
+## Uncomment to enable cloud support
+# rka_cloud:
+#   id: cloud
+#   mac: !secret cloud_mac
+#   uid: !secret cloud_uid
+
+## Uncomment to enable web server
+# web_server:
+#   include_internal: true
+

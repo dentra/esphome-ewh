@@ -1,0 +1,125 @@
+device:
+  mac: !secret ehu_mac
+  uid: !secret ehu_uid
+  name: Electrolux EHU
+  # Default packet byte order: little-endian (default) or big-endian
+  byte_order: little-endian
+
+state:
+  dev_state:
+    type: data
+    data: "00 00 00 00 00 07"
+    show: false
+  storage:
+    type: data
+    data: "00 00 00 00 00 00 00 00 00 00 00 00 00"
+    show: false
+  storage_uid:
+    type: data
+    data: !lambda return uid_data(x.uid)
+    show: false
+  state:
+
+
+commands:
+  dev_state:
+    request:
+      code: 0x01
+    response:
+      code: 0x81
+      struct:
+        - dev_state
+  data_save:
+    request:
+      code: 0x06
+    response:
+      code: 0x86
+      # 1 byte body, 01 means OK, 00 means ERROR. Later this data can be loaded via `07' command.
+      data: "01"
+  data_load:
+    request:
+      code: 0x07
+    response:
+      code: 0x87
+      struct:
+        - storage
+        - storage_uid
+  error:
+    request:
+      code: 0 # no request
+    response:
+      code: 0x05
+      struct:
+        - error
+  state:
+    request:
+      code: 0 # no request
+    response:
+      code: 0x09
+      struct: &state_rsp
+        - state
+        - current_temp
+        - target_temp
+        - clock_hours
+        - clock_minutes
+        - timer_hours
+        - timer_minutes
+        - error
+        - bst
+  state_req:
+    request:
+      code: 0x08
+    response:
+      code: 0x88
+      struct: *state_rsp
+  state_req_ex:
+    request:
+      code: [0x08, 0x10, 0x04]
+    response:
+      code: 0x88
+      struct: *state_rsp
+  set_mode:
+    request:
+      code: [0x0A, 0x00]
+      struct:
+        - state # `0` - off, `1` - 700W, `2` - 1300W, `3` - 2000W, `4` - no frost
+        - target_temp
+    response:
+      code: 0x8A
+      struct: *state_rsp
+  set_clock:
+    request:
+      code: [0x0A, 0x01]
+      struct:
+        - clock_hours
+        - clock_minutes
+    response:
+      code: 0x8A
+      struct: *state_rsp
+  set_timer:
+    request:
+      code: [0x0A, 0x02]
+      struct:
+        - timer_hours
+        - timer_minutes
+        - state # probably mode (`1` - 700W, `2` - 1300W, `3` - 2000W), but from app it is always `1`
+        - target_temp
+    response:
+      code: 0x8A
+      struct: *state_rsp
+  set_bst:
+    request:
+      code: [0x0A, 0x03]
+      struct:
+        - bst
+    response:
+      code: 0x8A
+      struct: *state_rsp
+tests:
+  - AT+NDBGL=0,0
+  - AT+APPVER
+  - AT+WSMAC
+  - 08 10 04
+  - 08
+  - 0a 00 03 14
+
