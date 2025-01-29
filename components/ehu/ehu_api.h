@@ -26,6 +26,9 @@ class EHUApi : public EHUApiBase {
 
   void set_power(bool power);
   void set_preset(uint8_t preset);
+  void set_ionizer(bool lock);
+  void set_lock(bool lock);
+  void set_sound(bool sound);
 
  protected:
   void write_byte(uint8_t cmd, uint8_t data) {

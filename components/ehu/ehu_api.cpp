@@ -23,8 +23,8 @@ void EHUApi::set_power(bool power) {
 }
 
 void EHUApi::set_preset(uint8_t preset) {
-  // TODO write preset
-  // this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_PRESET, op);
+  ESP_LOGD("Set preset to %u", preset);
+  this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_PRESET, preset);
 }
 
 }  // namespace ehu
