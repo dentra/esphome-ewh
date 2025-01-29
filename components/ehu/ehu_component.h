@@ -9,12 +9,14 @@
 namespace esphome {
 namespace ehu {
 
-using EHUComponentBase = rka_api::RKAComponent<rka_api::rka_dev_type_t::EHU, EHUListener, EHUApi>;
+using EHUComponentBase = rka_api::RKAComponent<rka_api::rka_dev_type_t::EHU, EHUListener, EHUApi, PollingComponent>;
 
 class EHUComponent : public EHUComponentBase {
  public:
   explicit EHUComponent(EHUApi *api) : EHUComponentBase(api) {}
   void on_state(const ehu_state_t &state) override {}
+
+  void update() { this->api_->request_state_ex(); }
 };
 
 }  // namespace ehu

@@ -30,7 +30,7 @@ EHU_COMPONENT_SCHEMA = cv.Schema(
         cv.GenerateID(CONF_EHU_ID): cv.use_id(EHUApi),
         cv.Optional(CONF_ICON, default=ICON_HUMIDIFIER): cv.icon,
     }
-).extend(cv.COMPONENT_SCHEMA)
+).extend(cv.polling_component_schema("15s"))
 
 
 async def new_ehu(config):
