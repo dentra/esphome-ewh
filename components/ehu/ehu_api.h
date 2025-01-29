@@ -26,7 +26,14 @@ class EHUApi : public EHUApiBase {
 
   void set_power(bool power);
   void set_preset(uint8_t preset);
+
  protected:
+  void write_byte(uint8_t cmd, uint8_t data) {
+    struct {
+      uint8_t data;
+    } PACKED op{.data = data};
+    this->write(cmd, op);
+  }
 };
 
 }  // namespace ehu

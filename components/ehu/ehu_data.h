@@ -6,6 +6,20 @@ namespace esphome {
 namespace ehu {
 #pragma pack(push, 1)
 
+enum ehu_packet_type_t : uint8_t {
+  // aa02 0a 01 b7
+  // aa02 0a 00 b6
+  PACKET_REQ_SET_POWER = rka_api::PACKET_REQ_SET_COMMAND,
+  // aa02 0b 11 c8
+  PACKET_REQ_0B = 0x0b,
+  // aa02 12 00 be
+  PACKET_REQ_12 = 0x12,
+  // aa02 16 01 c3
+  PACKET_REQ_16 = 0x16,
+  // aa02 19 32 f7
+  PACKET_REQ_19 = 0x19,
+};
+
 // Response for PACKET_REQ_STATE.
 struct ehu_state_t {
   bool power : 8;  // 03

@@ -18,18 +18,13 @@ static const char *const TAG = "ehu_api";
 using namespace esphome;
 
 void EHUApi::set_power(bool power) {
-  struct {
-    uint8_t power;
-  } op{.power = power};
-  this->write(rka_api::PACKET_REQ_SET_COMMAND, op);
+  ESP_LOGD("Turn power %s", ONOFF(power));
+  this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_POWER, power);
 }
 
 void EHUApi::set_preset(uint8_t preset) {
-  struct {
-    uint8_t preset;
-  } op{.preset = preset};
   // TODO write preset
-  // this->write(rka_api::PACKET_REQ_SET_COMMAND, op);
+  // this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_PRESET, op);
 }
 
 }  // namespace ehu
