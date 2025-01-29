@@ -81,7 +81,7 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
     ESP_LOGD(internal::TAG_API, "Request state (extended)");
     struct {
       uint8_t x[2];
-    } state_req{0x10, 0x04};
+    } PACKED state_req{0x10, 0x04};
     this->write(PACKET_REQ_STATE, state_req);
   }
 
@@ -92,7 +92,7 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
     struct {
       uint8_t op;
       T data;
-    } op{.op = T::SET_OPERATION, .data = data};
+    } PACKED op{.op = T::SET_OPERATION, .data = data};
     this->write(PACKET_REQ_SET_COMMAND, op);
   }
 
