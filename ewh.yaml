@@ -7,7 +7,7 @@ substitutions:
   # "esp8285" for coolrf-heatstick, or your own if you know it
   board: "esp32-s3-devkitc-1"
   # time platform: "sntp" for MQTT or "homeassistant" for API
-  time_platform: "sntp"
+  time_platform: "homeassistant"
   # SSID of your wifi
   wifi_ssid: !secret wifi_ssid
   # password of your wifi
