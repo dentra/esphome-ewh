@@ -18,12 +18,12 @@ static const char *const TAG = "ehu_api";
 using namespace esphome;
 
 void EHUApi::set_power(bool power) {
-  ESP_LOGD("Turn power %s", ONOFF(power));
+  ESP_LOGD(TAG, "Turn power %s", ONOFF(power));
   this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_POWER, power);
 }
 
 void EHUApi::set_preset(uint8_t preset) {
-  ESP_LOGD("Set preset to %u", preset);
+  ESP_LOGD(TAG, "Set preset to %u", preset);
   this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_PRESET, preset);
 }
 
