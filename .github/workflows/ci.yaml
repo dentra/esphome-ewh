@@ -31,7 +31,7 @@ jobs:
         id: esphome
         with:
           version: ${{ env.ESPHOME_VERSION }}
-          config: ${{ matrix.component }}
+          config: ${{ matrix.component }}.yaml
           substitutions: '{"project_version": "dev", "project_name": "${{ matrix.component }}"}'
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Show firmware artifacts
