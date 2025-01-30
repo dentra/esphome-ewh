@@ -7,7 +7,6 @@
 #include "esphome/components/switch/switch.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
 
-
 #include "../ehu_component.h"
 
 namespace esphome {
@@ -33,6 +32,7 @@ class EHUFan : public EHUComponent, public fan::Fan {
   void set_sound_switch(switch_::Switch *sound) { this->sound_ = sound; }
 
   void set_water_binary_sensor(binary_sensor::BinarySensor *water) { this->water_ = water; }
+
  protected:
   sensor::Sensor *temperature_{};
   sensor::Sensor *humidity_{};
@@ -46,7 +46,7 @@ class EHUFan : public EHUComponent, public fan::Fan {
   binary_sensor::BinarySensor *water_{};
 
   template<class T, typename V> inline void publish_state_(T *var, V val) {
-    if (var != nullptr) {
+    if (var != nullptr && static_cast<V>(var->state) != val) {
       var->publish_state(val);
     }
   }
