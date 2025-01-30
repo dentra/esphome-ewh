@@ -1,4 +1,4 @@
-name: on push
+name: ci
 
 on:
   push:
@@ -9,7 +9,7 @@ env:
   PYTHON_VERSION: "3.12"
 
 jobs:
-  compile:
+  build:
     runs-on: ubuntu-latest
     outputs:
       firmware-path: ${{ steps.esphome.outputs.firmware-path }}
