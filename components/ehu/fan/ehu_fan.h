@@ -13,6 +13,10 @@ namespace esphome {
 namespace ehu {
 
 class EHUFan : public EHUComponent, public fan::Fan {
+  template<uint16_t cmd_v> friend class EHUSwitch;
+  friend class EHUWarmMistSwitch;
+  friend class EHUUVSwitch;
+
  public:
   explicit EHUFan(EHUApi *api) : EHUComponent(api) {}
 
@@ -50,19 +54,56 @@ class EHUFan : public EHUComponent, public fan::Fan {
       var->publish_state(val);
     }
   }
+
+  void after_write() {
+    this->set_timeout("after_write", 100, [this]() { this->update(); });
+  }
 };
-#ifdef USE_SWITCH
-class EHUSwitch : public switch_::Switch, public Component {
+
+template<uint16_t cmd_v> class EHUSwitch : public switch_::Switch, public Component, public Parented<EHUFan> {
  public:
-  EHUSwitch(EHUApi *api) : api_(api) {}
+  EHUSwitch(EHUFan *fan) : Parented(fan) {}
+  void write_state(bool state) override { this->write_byte_(state); }
+
+ protected:
+  void write_byte_(uint8_t data) {
+    if (cmd_v != 0) {
+      this->parent_->api_->write_byte(cmd_v, data);
+      this->parent_->after_write();
+    }
+  }
+};
+
+template<uint16_t state_flag_first_v, uint16_t state_flag_second_v>
+class EHUWaterSwitchBase : public EHUSwitch<ehu_packet_type_t::PACKET_REQ_SET_WARM_MIST_UV> {
+ protected:
+  EHUWaterSwitchBase(EHUFan *fan, switch_::Switch *second) : EHUSwitch(fan) {}
+
+ public:
   void write_state(bool state) override {
-    // TODO do api write
+    uint8_t data = 0;
+    if (state) {
+      data |= state_flag_first_v;
+    }
+    if (this->second_ && this->second_->state) {
+      data |= state_flag_second_v;
+    }
+    this->write_byte_(data);
   }
 
  protected:
-  EHUApi *api_;
+  switch_::Switch *second_{};
 };
 
-#endif
+class EHUWarmMistSwitch : public EHUWaterSwitchBase<ehu_state_t::WATER_WARM_MIST, ehu_state_t::WATER_UV> {
+ public:
+  EHUWarmMistSwitch(EHUFan *fan) : EHUWaterSwitchBase(fan, fan->uv_) {}
+};
+
+class EHUUVSwitch : public EHUWaterSwitchBase<ehu_state_t::WATER_UV, ehu_state_t::WATER_WARM_MIST> {
+ public:
+  EHUUVSwitch(EHUFan *fan) : EHUWaterSwitchBase(fan, fan->warm_mist_) {}
+};
+
 }  // namespace ehu
 }  // namespace esphome

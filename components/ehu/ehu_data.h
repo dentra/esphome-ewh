@@ -22,6 +22,10 @@ enum ehu_packet_type_t : uint8_t {
   // aa02 19 32 f7
   PACKET_REQ_19 = 0x19,
 
+  PACKET_REQ_SET_WARM_MIST_UV = 0,
+  PACKET_REQ_SET_LOCK = 0,
+  PACKET_REQ_SET_SOUND = 0,
+  PACKET_REQ_SET_IONIZER = 0,
 };
 
 // Response for PACKET_REQ_STATE.

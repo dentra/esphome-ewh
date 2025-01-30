@@ -85,7 +85,7 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
     this->write(PACKET_REQ_STATE, state_req);
   }
 
-  // Write operation.
+  /// Write operation using PACKET_REQ_SET_COMMAND.
   template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true> void write_op(const T &data) {
     ESP_LOGD(internal::TAG_API, "Set state (%u) %s", T::SET_OPERATION,
              format_hex_pretty(reinterpret_cast<const uint8_t *>(&data), sizeof(data)).c_str());
@@ -96,7 +96,7 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
     this->write(PACKET_REQ_SET_COMMAND, op);
   }
 
-  // Write state.
+  /// Write state using PACKET_REQ_SET_COMMAND.
   template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true> void write_st(const T &data) {
     ESP_LOGD(internal::TAG_API, "Set state %s",
              format_hex_pretty(reinterpret_cast<const uint8_t *>(&data), sizeof(data)).c_str());
@@ -108,11 +108,13 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
   //   this->defer(TAG_API, [this]() { this->request_state(); });
   // }
 
+  /// Write command of specified type.
   void write(uint8_t type) {
     // ESP_LOGD(internal::TAG_API, "Write %02X", type);
     this->write_(&type, sizeof(type));
   }
 
+  /// Write command of specified type and data struct.
   template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true>
   void write(uint8_t type, const T &data) {
     // ESP_LOGD(internal::TAG_API, "Write %02X: %s", type, format_hex_pretty(&data, sizeof(data)).c_str());
@@ -120,8 +122,15 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
     this->write_(&frame, sizeof(frame));
   }
 
+  /// Write command of type from T::REQ_FRAME_TYPE and data struct.
   template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true> void write(const T &data) {
     this->write(T::REQ_FRAME_TYPE, data);
+  }
+
+  /// Write command of specified type and byte data.
+  void write_byte(uint8_t type, uint8_t data) {
+    rka_frame_t<uint8_t> frame{.type = type, .data = data};
+    this->write_(&frame, sizeof(frame));
   }
 
  protected:

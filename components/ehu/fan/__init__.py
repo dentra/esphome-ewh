@@ -3,6 +3,7 @@ import esphome.config_validation as cv
 from esphome.components import binary_sensor, fan, sensor, switch
 from esphome.const import (
     CONF_HUMIDITY,
+    CONF_ID,
     CONF_NAME,
     CONF_TEMPERATURE,
     DEVICE_CLASS_HUMIDITY,
@@ -14,7 +15,7 @@ from esphome.const import (
     UNIT_PERCENT,
 )
 
-from .. import CONF_EHU_ID, EHU_COMPONENT_SCHEMA, EHUComponent, ehu_ns, new_ehu
+from .. import EHU_COMPONENT_SCHEMA, EHUComponent, ehu_ns, new_ehu
 
 AUTO_LOAD = ["ehu", "fan", "sensor", "binary_sensor", "switch"]
 
@@ -27,6 +28,11 @@ CONF_WATER="water"
 
 EHUFan = ehu_ns.class_("EHUFan", EHUComponent)
 EHUSwitch= ehu_ns.class_("EHUSwitch", switch.Switch, cg.Component)
+EHUWarmMistSwitch= ehu_ns.class_("EHUWarmMistSwitch", switch.Switch, cg.Component)
+EHUUVSwitch=ehu_ns.class_("EHUUVSwitch", switch.Switch, cg.Component)
+
+EHUPacketType=ehu_ns.enum("ehu_packet_type_t", is_class=True)
+
 
 CONFIG_SCHEMA = fan.FAN_SCHEMA.extend(
     {
@@ -51,7 +57,7 @@ CONFIG_SCHEMA = fan.FAN_SCHEMA.extend(
         ),
         cv.Optional(CONF_WARM_MIST): cv.maybe_simple_value(
             switch.switch_schema(
-                EHUSwitch,
+                EHUWarmMistSwitch,
                 entity_category=ENTITY_CATEGORY_CONFIG,
                 block_inverted=True,
             ),
@@ -59,7 +65,7 @@ CONFIG_SCHEMA = fan.FAN_SCHEMA.extend(
         ),
         cv.Optional(CONF_UV): cv.maybe_simple_value(
             switch.switch_schema(
-                EHUSwitch,
+                EHUUVSwitch,
                 entity_category=ENTITY_CATEGORY_CONFIG,
                 block_inverted=True,
             ),
@@ -67,7 +73,7 @@ CONFIG_SCHEMA = fan.FAN_SCHEMA.extend(
         ),
         cv.Optional(CONF_IONIZER): cv.maybe_simple_value(
             switch.switch_schema(
-                EHUSwitch,
+                EHUSwitch.template(EHUPacketType.PACKET_REQ_SET_IONIZER),
                 entity_category=ENTITY_CATEGORY_CONFIG,
                 block_inverted=True,
             ),
@@ -75,7 +81,7 @@ CONFIG_SCHEMA = fan.FAN_SCHEMA.extend(
         ),
         cv.Optional(CONF_LOCK): cv.maybe_simple_value(
             switch.switch_schema(
-                EHUSwitch,
+                EHUSwitch.template(EHUPacketType.PACKET_REQ_SET_LOCK),
                 entity_category=ENTITY_CATEGORY_CONFIG,
                 block_inverted=True,
             ),
@@ -83,7 +89,7 @@ CONFIG_SCHEMA = fan.FAN_SCHEMA.extend(
         ),
         cv.Optional(CONF_SOUND): cv.maybe_simple_value(
             switch.switch_schema(
-                EHUSwitch,
+                EHUSwitch.template(EHUPacketType.PACKET_REQ_SET_SOUND),
                 entity_category=ENTITY_CATEGORY_CONFIG,
                 block_inverted=True,
             ),
@@ -105,8 +111,8 @@ async def setup_sensor(config, key, fn):
 
 async def setup_switch(config, key, fn):
     if key in config:
-        api = await cg.get_variable(config[CONF_EHU_ID])
-        var = await switch.new_switch(config[key], api)
+        fan = await cg.get_variable(config[CONF_ID])
+        var = await switch.new_switch(config[key], fan)
         await cg.register_component(var, config[key])
         cg.add(fn(var))
 

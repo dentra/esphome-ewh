@@ -51,10 +51,8 @@ Water heater components are build using climate platform and allows the followin
 Humidifier components are build using climate platform and allows the following:
 
 - Control on/off
-<!--
 - Control fan speed
 - Control internal presets
-  -->
 - Monitor warm mist
 - Monitor UV
 - Monitor ionizer
@@ -62,6 +60,7 @@ Humidifier components are build using climate platform and allows the following:
 - Monitor sound
 - Monitor humidity
 - Monitor temperature
+- Monitor empty water tank
 
 > [!CAUTION]
 >
