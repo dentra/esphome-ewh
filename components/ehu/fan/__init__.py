@@ -1,11 +1,12 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import fan, sensor, switch
+from esphome.components import binary_sensor, fan, sensor, switch
 from esphome.const import (
     CONF_HUMIDITY,
     CONF_NAME,
     CONF_TEMPERATURE,
     DEVICE_CLASS_HUMIDITY,
+    DEVICE_CLASS_MOISTURE,
     DEVICE_CLASS_TEMPERATURE,
     ENTITY_CATEGORY_CONFIG,
     STATE_CLASS_MEASUREMENT,
@@ -15,13 +16,14 @@ from esphome.const import (
 
 from .. import CONF_EHU_ID, EHU_COMPONENT_SCHEMA, EHUComponent, ehu_ns, new_ehu
 
-AUTO_LOAD = ["ehu"]
+AUTO_LOAD = ["ehu", "fan", "sensor", "binary_sensor", "switch"]
 
 CONF_WARM_MIST="warm_mist"
 CONF_UV="uv"
 CONF_IONIZER="ionizer"
 CONF_LOCK="lock"
 CONF_SOUND="sound"
+CONF_WATER="water"
 
 EHUFan = ehu_ns.class_("EHUFan", EHUComponent)
 EHUSwitch= ehu_ns.class_("EHUSwitch", switch.Switch, cg.Component)
@@ -87,6 +89,12 @@ CONFIG_SCHEMA = fan.FAN_SCHEMA.extend(
             ),
             key=CONF_NAME,
         ),
+        cv.Optional(CONF_WATER): cv.maybe_simple_value(
+            binary_sensor.binary_sensor_schema(
+                device_class=DEVICE_CLASS_MOISTURE
+            ),
+            key=CONF_NAME,
+        ),
     }
 ).extend(EHU_COMPONENT_SCHEMA)
 
@@ -102,6 +110,11 @@ async def setup_switch(config, key, fn):
         await cg.register_component(var, config[key])
         cg.add(fn(var))
 
+async def setup_binary_sensor(config, key, fn):
+    if key in config:
+        var = await binary_sensor.new_binary_sensor(config[key])
+        cg.add(fn(var))
+
 async def to_code(config):
     var = await new_ehu(config)
     await fan.register_fan(var, config)
@@ -114,3 +127,5 @@ async def to_code(config):
     await setup_switch(config, CONF_IONIZER, var.set_ionizer_switch)
     await setup_switch(config, CONF_LOCK, var.set_lock_switch)
     await setup_switch(config, CONF_SOUND, var.set_sound_switch)
+
+    await setup_binary_sensor(config, CONF_WATER, var.set_water_binary_sensor)

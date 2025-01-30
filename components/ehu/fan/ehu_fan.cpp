@@ -74,8 +74,8 @@ void EHUFan::on_state(const ehu_state_t &status) {
     has_changes = true;
   }
 
-  if (status.speed != this->speed) {
-    this->speed = status.speed;
+  if (status.fan_speed != this->speed) {
+    this->speed = status.fan_speed;
     has_changes = true;
   }
 
@@ -118,32 +118,14 @@ void EHUFan::on_state(const ehu_state_t &status) {
     this->publish_state();
   }
 
-#ifdef USE_SENSOR
-  if (this->temperature_) {
-    this->temperature_->publish_state(status.temperature);
-  }
-  if (this->humidity_) {
-    this->humidity_->publish_state(status.humidity);
-  }
-#endif
-
-#ifdef USE_SWITCH
-  if (this->warm_mist_) {
-    this->warm_mist_->publish_state(status.water_flags & ehu_state_t::WATER_WARM_MIST);
-  }
-  if (this->uv_) {
-    this->uv_->publish_state(status.water_flags & ehu_state_t::WATER_UV);
-  }
-  if (this->ionizer_) {
-    this->ionizer_->publish_state(status.ionizer);
-  }
-  if (this->lock_) {
-    this->lock_->publish_state(status.lock);
-  }
-  if (this->sound_) {
-    this->sound_->publish_state(status.sound);
-  }
-#endif
+  this->publish_state_(this->temperature_, status.temperature);
+  this->publish_state_(this->humidity_, status.humidity);
+  this->publish_state_(this->warm_mist_, status.water_flags & ehu_state_t::WATER_WARM_MIST);
+  this->publish_state_(this->uv_, status.water_flags & ehu_state_t::WATER_UV);
+  this->publish_state_(this->ionizer_, status.ionizer);
+  this->publish_state_(this->lock_, status.lock);
+  this->publish_state_(this->sound_, status.sound);
+  this->publish_state_(this->water_, !status.water_tank_empty);
 
   EHUComponent::on_state(status);
 }
