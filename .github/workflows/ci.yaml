@@ -26,6 +26,12 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+      - name: Generate fake secrets.yaml
+        run: |
+          touch secrets.yaml
+          echo "wifi_ssid: 'fake_ssid'" >> secrets.yaml
+          echo "wifi_password: '12345678'" >> secrets.yaml
+          echo "wifi_ap_password: '12345678'" >> secrets.yaml
       - name: Build project
         uses: dentra/esphome-action@main
         id: esphome
