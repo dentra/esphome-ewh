@@ -2,7 +2,7 @@ name: on push
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 env:
   ESPHOME_VERSION: "2024.12.4"
