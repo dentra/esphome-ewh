@@ -1,21 +1,9 @@
 substitutions:
   board: esp32-s3-devkitc-1
-  framework_type: esp-idf
+
+packages:
+  esp32: !include esp32.yaml
 
 esphome:
   platformio_options:
     board_build.flash_mode: dio
-    build_flags:
-      - -std=gnu++17
-    build_unflags:
-      - -std=gnu++11
-    lib_ldf_mode: "chain" # required for ESP32 AsyncUDP library search
-
-esp32:
-  board: $board
-  framework:
-    type: esp-idf
-    version: 4.4.7
-    platform_version: 5.4.0
-
-esp32_usb_dis:
