@@ -20,6 +20,8 @@ void EHUFan::dump_config() { LOG_FAN("", "Electrolux Humidifier", this); }
 
 fan::FanTraits EHUFan::get_traits() {
   auto traits = fan::FanTraits();
+  traits.set_speed(true);
+  traits.set_supported_speed_count(3);
   traits.set_supported_preset_modes({
       PRESET_AUTO,
       PRESET_HEALTH,
@@ -38,7 +40,11 @@ void EHUFan::control(const fan::FanCall &call) {
     this->api_->set_power(*call.get_state());
   }
 
-  auto preset = this->preset_mode;
+  if (call.get_speed().has_value()) {
+    this->api_->set_speed(*call.get_speed());
+  }
+
+  auto preset = call.get_preset_mode();
   if (!preset.empty()) {
     if (preset == PRESET_AUTO) {
       this->api_->set_preset(ehu_state_t::PRESET_AUTO);
@@ -65,6 +71,11 @@ void EHUFan::on_state(const ehu_state_t &status) {
 
   if (status.power != this->state) {
     this->state = status.power;
+    has_changes = true;
+  }
+
+  if (status.speed != this->speed) {
+    this->speed = status.speed;
     has_changes = true;
   }
 

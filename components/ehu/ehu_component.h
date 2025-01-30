@@ -16,7 +16,7 @@ class EHUComponent : public EHUComponentBase {
   explicit EHUComponent(EHUApi *api) : EHUComponentBase(api) {}
   void on_state(const ehu_state_t &state) override {}
 
-  void update() { this->api_->request_state_ex(); }
+  void update() override { this->api_->request_state_ex(); }
 };
 
 }  // namespace ehu

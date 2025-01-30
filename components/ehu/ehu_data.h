@@ -12,13 +12,16 @@ enum ehu_packet_type_t : uint8_t {
   PACKET_REQ_SET_POWER = rka_api::PACKET_REQ_SET_COMMAND,
   // aa02 0b 01 b8 auto
   // aa02 0b 11 c8
-  PACKET_REQ_SET_PRESET = 0x0b,
+  PACKET_REQ_SET_PRESET = 0x0B,
+
+  PACKET_REQ_SET_SPEED = 0x1A,
   // aa02 12 00 be
   PACKET_REQ_12 = 0x12,
   // aa02 16 01 c3
   PACKET_REQ_16 = 0x16,
   // aa02 19 32 f7
   PACKET_REQ_19 = 0x19,
+
 };
 
 // Response for PACKET_REQ_STATE.

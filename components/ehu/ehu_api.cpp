@@ -27,5 +27,10 @@ void EHUApi::set_preset(uint8_t preset) {
   this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_PRESET, preset);
 }
 
+void EHUApi::set_speed(uint8_t speed) {
+  ESP_LOGD(TAG, "Set speed to %u", speed);
+  this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_SPEED, speed);
+}
+
 }  // namespace ehu
 }  // namespace esphome
