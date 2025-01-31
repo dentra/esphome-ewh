@@ -2,15 +2,13 @@ substitutions:
   project_branch: master
   # project version
   # project_version: $project_branch
-  project_version: 2024-master
+  project_version: 2025-master
   # project git source
   project_source: github://dentra/esphome-ewh@$project_branch
   # project source refresh interval
   project_source_refresh: 12h
-  # project idenitfier
-  project_id: ewh
   # node name
-  node_name: $project_id
+  node_name: "#" # used invalid char to force user override
   # name for main entity and prefix for all others.
   friendly_name: $node_name
   # add suffix for node name to have one firmware for many devices.
@@ -20,9 +18,10 @@ esphome:
   name: $node_name
   friendly_name: $friendly_name
   name_add_mac_suffix: $node_add_mac_suffix
+  comment: https://t.me/dentra_blog
   project:
-    name: "dentra.$project_id"
-    version: "$project_version ($framework_type)"
+    name: "dentra.ewh-$framework_type-$board"
+    version: "$project_version"
   min_version: "2024.12.4" # can't use substitutions here
 
 preferences:
@@ -30,7 +29,6 @@ preferences:
 
 wifi:
   ap:
-    ssid: "$friendly_name Hotspot"
 captive_portal:
 
 ota:
