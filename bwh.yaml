@@ -1,22 +1,22 @@
 substitutions:
-  # main prefix for all entities
+  ## Main prefix for all entities
   friendly_name: "Water Heater"
-  # name of your node
+  ## Name of the node. Don't use underscores!
+  ## https://esphome.io/guides/faq.html#why-shouldn-t-i-use-underscores-in-my-device-name
   node_name: "water-heater"
-  # use "esp32-s3-devkitc-1" for Lilygo T-Dongle S3, "esp12e" for iot-uni-dongle,
-  # "esp8285" for coolrf-heatstick, or your own if you know it
-  board: "esp32-s3-devkitc-1"
-  # SSID of your wifi
+
+  ## SSID of your wifi
   wifi_ssid: !secret wifi_ssid
-  # password of your wifi
+  ## Password of your wifi
   wifi_password: !secret wifi_password
-  # password for fallback wifi hotspot
+  ## Password for fallback wifi hotspot
   wifi_ap_password: !secret wifi_ap_password
-  # UART configuration. Somtimes may need to swap tx/rx.
+
+  ## UART configuration. Somtimes may need to swap tx/rx.
   tx_pin: GPIO19 # use TX for iot-uni-dongle or coolrf-heatstick
   rx_pin: GPIO20 # use RX for iot-uni-dongle or coolrf-heatstick
 
-# please do not change packeages order it is very important, just comment/uncomment
+## Please do not change packages order it is very important, just comment/uncomment
 packages:
   remote:
     url: https://github.com/dentra/esphome-ewh
@@ -35,10 +35,10 @@ packages:
       # Required package, replace with esp8266.yaml if you use ESP8266
       - packages/esp32.yaml
 
-# Enable Home Assistant API connection. Please comment if you plan to use MQTT.
+## Enable Home Assistant API connection. Please comment if you plan to use MQTT.
 api:
 
-# Uncomment to enable MQTT connecion.
+## Uncomment to enable MQTT connecion.
 # mqtt:
 #   broker: !secret mqtt_borker
 #   username: !secret mqtt_username
@@ -51,9 +51,9 @@ wifi:
   password: $wifi_password
 
 uart:
-  tx_pin: $tx_pin
-  rx_pin: $rx_pin
-  baud_rate: 9600
+  - tx_pin: $tx_pin
+    rx_pin: $rx_pin
+    baud_rate: 9600
 
 vport:
   - platform: bwh
@@ -61,7 +61,7 @@ vport:
 climate:
   - platform: bwh
     id: whc
-    name: None # use friendly_name
+    name: Climate
 
 ## Uncomment to enable cloud support
 # rka_cloud:
