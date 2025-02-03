@@ -120,15 +120,6 @@ void EHUFan::on_state(const ehu_state_t &status) {
     this->publish_state();
   }
 
-  this->publish_state_(this->temperature_, status.temperature);
-  this->publish_state_(this->humidity_, status.humidity);
-  this->publish_state_(this->warm_mist_, status.water_flags & ehu_state_t::WATER_WARM_MIST);
-  this->publish_state_(this->uv_, status.water_flags & ehu_state_t::WATER_UV);
-  this->publish_state_(this->ionizer_, status.ionizer);
-  this->publish_state_(this->lock_, status.lock);
-  this->publish_state_(this->sound_, status.sound);
-  this->publish_state_(this->water_, !status.water_tank_empty);
-
   EHUComponent::on_state(status);
 }
 
