@@ -38,7 +38,7 @@ jobs:
         with:
           version: ${{ env.ESPHOME_VERSION }}
           config: ${{ matrix.component }}.yaml
-          substitutions: '{"project_version": "dev", "project_name": "${{ matrix.component }}"}'
+          substitutions: '{"project_version": "dev", "project_name": "${{ matrix.component }}", "project_source": "./components"}'
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Show firmware artifacts
         run: |
