@@ -39,6 +39,7 @@ struct ehu_state_t {
     PRESET_FITNESS = 0x06,     // 06 - фитнес
     PRESET_YOGA = 0x07,        // 07 - YOGA
     PRESET_MEDITATION = 0x08,  // 08 - Медитация
+    PRESET_MEDITATION = 0x0C,  // 0C - Prana Auto
     PRESET_MANUAL = 0x0F,      // 0F - ручной
   } preset_mode;               // 04
   uint8_t unknown0510[6];      // 05-10 00 00 00 00 00 00

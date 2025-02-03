@@ -14,6 +14,7 @@ static const std::string PRESET_BABY = "Baby";              // 04 - Детски
 static const std::string PRESET_FITNESS = "Fitness";        // 06 - фитнес
 static const std::string PRESET_YOGA = "Yoga";              // 07 - YOGA
 static const std::string PRESET_MEDITATION = "Meditation";  // 08 - Медитация
+static const std::string PRESET_PRANA = "Prana";            // 0C - Prana
 static const std::string PRESET_MANUAL = "Manual";          // 0F - ручной
 
 void EHUFan::dump_config() { LOG_FAN("", "Electrolux Humidifier", this); }
@@ -30,6 +31,7 @@ fan::FanTraits EHUFan::get_traits() {
       PRESET_FITNESS,
       PRESET_YOGA,
       PRESET_MEDITATION,
+      PRESET_PRANA,
       PRESET_MANUAL,
   });
   return traits;
@@ -60,6 +62,8 @@ void EHUFan::control(const fan::FanCall &call) {
       this->api_->set_preset(ehu_state_t::PRESET_YOGA);
     } else if (preset == PRESET_MEDITATION) {
       this->api_->set_preset(ehu_state_t::PRESET_MEDITATION);
+    } else if (preset == PRESET_PRANA) {
+      this->api_->set_preset(ehu_state_t::PRESET_PRANA);
     } else {
       this->api_->set_preset(ehu_state_t::PRESET_MANUAL);
     }
@@ -103,6 +107,9 @@ void EHUFan::on_state(const ehu_state_t &status) {
       break;
     case ehu_state_t::PRESET_NIGHT:
       preset = PRESET_NIGHT;
+      break;
+    case ehu_state_t::PRESET_PRANA:
+      preset = PRESET_PRANA;
       break;
     case ehu_state_t::PRESET_YOGA:
       preset = PRESET_YOGA;
