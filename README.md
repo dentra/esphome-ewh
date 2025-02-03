@@ -25,11 +25,11 @@
 
 This is a set of ESPHome components to control Rusklimat devices using UART protocol:
 
-- Electrolux Water Heater (EWH)
-- Ballu Water Heater (BWH)
-- Zanussi Water Heater (ZWH)
-- Electrolux Humidifier (EHU) (early beta!)
-- Electrolux Thermostat (ETS) (experimental!)
+- Electrolux [Water Heater](#water-heater) (EWH)
+- Ballu [Water Heater](#water-heater) (BWH)
+- Zanussi [Water Heater](#water-heater) (ZWH)
+- Electrolux [Humidifier](#humidifier) (EHU) (early beta!)
+- Electrolux [Thermostat](#thermostat) (ETS) (experimental!)
 
 Control is possible via custom dongle. You can make it yourself or buy a ready made.
 
@@ -98,14 +98,15 @@ Humidifier components are build using `fan` platform and allows the following:
 - Control on/off
 - Control fan speed
 - Control internal presets
-- Monitor warm mist
-- Monitor UV
-- Monitor ionizer
-- Monitor lock
-- Monitor sound
+- Control warm mist
+- Control UV
+- Control ionizer
+- Control lock
+- Control mute
 - Monitor humidity
 - Monitor temperature
 - Monitor empty water tank
+- Update clock
 
 ## Thermostat
 

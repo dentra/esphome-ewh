@@ -29,7 +29,14 @@ void EHUApi::set_preset(uint8_t preset) {
 
 void EHUApi::set_speed(uint8_t speed) {
   ESP_LOGD(TAG, "Set speed to %u", speed);
-  this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_SPEED, speed);
+  if (speed == 2) {
+    // aa02 19 3c 01 вентилятор среднее
+    this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_SPEED_MID, 0x3C);
+  } else {
+    // aa02 1a 01 c7 вентилятор минимум
+    // aa02 1a 03 c9 вентилятор макс
+    this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_SPEED, speed);
+  }
 }
 
 void EHUApi::set_clock(uint8_t hours, uint8_t minutes) {
@@ -46,7 +53,7 @@ void EHUApi::set_clock(uint8_t hours, uint8_t minutes) {
     uint8_t hours;
     uint8_t minutes;
   } PACKED data{.hours = hours, .minutes = minutes};
-  this->write_struct(ehu_packet_type_t::PACKET_REQ_SET_CLOCK, data);
+  this->write(ehu_packet_type_t::PACKET_REQ_SET_CLOCK, data);
 }
 
 }  // namespace ehu

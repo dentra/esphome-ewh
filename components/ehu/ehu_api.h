@@ -30,7 +30,7 @@ class EHUApi : public EHUApiBase {
 
   void set_ionizer(bool lock);
   void set_lock(bool lock);
-  void set_sound(bool sound);
+  void set_mute(bool mute);
 
   void set_clock(uint8_t hours, uint8_t minutes);
 };

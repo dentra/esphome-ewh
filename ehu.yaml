@@ -77,7 +77,7 @@ fan:
     uv: UV
     ionizer: Ionizer
     lock: Lock
-    sound: Sound
+    mute: Mute
     water: Water
 
 ## Uncomment to enable cloud support

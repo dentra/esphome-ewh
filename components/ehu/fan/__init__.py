@@ -21,24 +21,7 @@ EHUFan = ehu_ns.class_("EHUFan", EHUComponent)
 CONFIG_SCHEMA = fan.FAN_SCHEMA.extend(
     {
         cv.GenerateID(): cv.declare_id(EHUFan),
-        cv.Optional(CONF_TEMPERATURE): cv.maybe_simple_value(
-            sensor.sensor_schema(
-                unit_of_measurement=UNIT_CELSIUS,
-                accuracy_decimals=0,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT
-            ),
-            key=CONF_NAME,
-        ),
-        cv.Optional(CONF_HUMIDITY):  cv.maybe_simple_value(
-            sensor.sensor_schema(
-                unit_of_measurement=UNIT_PERCENT,
-                accuracy_decimals=0,
-                device_class=DEVICE_CLASS_HUMIDITY,
-                state_class=STATE_CLASS_MEASUREMENT
-            ),
-            key=CONF_NAME,
-        ),
+
 
     }
 ).extend(EHU_COMPONENT_SCHEMA)

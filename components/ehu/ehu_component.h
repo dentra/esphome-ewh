@@ -6,6 +6,10 @@
 #include "esphome/components/binary_sensor/binary_sensor.h"
 #include "esphome/components/switch/switch.h"
 
+#ifdef USE_TIME
+#include "esphome/components/time/real_time_clock.h"
+#endif
+
 #include "../rka_api/rka_component.h"
 #include "ehu_api.h"
 
@@ -25,6 +29,10 @@ class EHUComponent : public EHUComponentBase {
 
   void update() override { this->api_->request_state_ex(); }
 
+#ifdef USE_TIME
+  void set_time_id(esphome::time::RealTimeClock *time) { this->time_ = time; }
+#endif
+
   void set_temperature_sensor(sensor::Sensor *temperature) { this->temperature_ = temperature; }
   void set_humidity_sensor(sensor::Sensor *humidity) { this->humidity_ = humidity; }
 
@@ -32,11 +40,15 @@ class EHUComponent : public EHUComponentBase {
   void set_uv_switch(switch_::Switch *uv) { this->uv_ = uv; }
   void set_ionizer_switch(switch_::Switch *ionizer) { this->ionizer_ = ionizer; }
   void set_lock_switch(switch_::Switch *lock) { this->lock_ = lock; }
-  void set_sound_switch(switch_::Switch *sound) { this->sound_ = sound; }
+  void set_mute_switch(switch_::Switch *mute) { this->mute_ = mute; }
 
   void set_water_binary_sensor(binary_sensor::BinarySensor *water) { this->water_ = water; }
 
  protected:
+#ifdef USE_TIME
+  esphome::time::RealTimeClock *time_{};
+#endif
+
   sensor::Sensor *temperature_{};
   sensor::Sensor *humidity_{};
 
@@ -44,7 +56,7 @@ class EHUComponent : public EHUComponentBase {
   switch_::Switch *uv_{};
   switch_::Switch *ionizer_{};
   switch_::Switch *lock_{};
-  switch_::Switch *sound_{};
+  switch_::Switch *mute_{};
 
   binary_sensor::BinarySensor *water_{};
 
@@ -52,10 +64,6 @@ class EHUComponent : public EHUComponentBase {
     if (var != nullptr && static_cast<V>(var->state) != val) {
       var->publish_state(val);
     }
-  }
-
-  void after_write() {
-    this->set_timeout("after_write", 100, [this]() { this->update(); });
   }
 };
 
@@ -68,7 +76,6 @@ template<uint16_t cmd_v> class EHUSwitch : public switch_::Switch, public Compon
   void write_byte_(uint8_t data) {
     if (cmd_v != 0) {
       this->parent_->api_->write_byte(cmd_v, data);
-      this->parent_->after_write();
     }
   }
 };

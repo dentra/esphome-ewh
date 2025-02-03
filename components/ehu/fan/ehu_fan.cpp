@@ -68,8 +68,6 @@ void EHUFan::control(const fan::FanCall &call) {
       this->api_->set_preset(ehu_state_t::PRESET_MANUAL);
     }
   }
-
-  this->after_write();
 }
 
 void EHUFan::on_state(const ehu_state_t &status) {

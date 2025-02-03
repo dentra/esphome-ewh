@@ -1,20 +1,27 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.components import binary_sensor, switch
+from esphome.components import binary_sensor, sensor, switch, time
 from esphome.const import (
+    CONF_HUMIDITY,
     CONF_ICON,
     CONF_ID,
     CONF_NAME,
+    CONF_TEMPERATURE,
     CONF_TIME_ID,
+    DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_MOISTURE,
+    DEVICE_CLASS_TEMPERATURE,
     ENTITY_CATEGORY_CONFIG,
+    STATE_CLASS_MEASUREMENT,
+    UNIT_CELSIUS,
+    UNIT_PERCENT,
 )
 
 from .. import rka_api  # pylint: disable=relative-beyond-top-level
 
 CODEOWNERS = ["@dentra"]
-AUTO_LOAD = ["rka_api", "switch", "binary_sensor"]
+AUTO_LOAD = ["rka_api", "switch", "binary_sensor","sensor", "time"]
 
 CONF_EHU_ID = "ehu_id"
 
@@ -25,7 +32,7 @@ CONF_WARM_MIST="warm_mist"
 CONF_UV="uv"
 CONF_IONIZER="ionizer"
 CONF_LOCK="lock"
-CONF_SOUND="sound"
+CONF_MUTE="mute"
 CONF_WATER="water"
 
 
@@ -51,6 +58,25 @@ EHU_COMPONENT_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_EHU_ID): cv.use_id(EHUApi),
         cv.Optional(CONF_ICON, default=ICON_HUMIDIFIER): cv.icon,
+        cv.GenerateID(CONF_TIME_ID): cv.use_id(time.RealTimeClock),
+        cv.Optional(CONF_TEMPERATURE): cv.maybe_simple_value(
+            sensor.sensor_schema(
+                unit_of_measurement=UNIT_CELSIUS,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT
+            ),
+            key=CONF_NAME,
+        ),
+        cv.Optional(CONF_HUMIDITY):  cv.maybe_simple_value(
+            sensor.sensor_schema(
+                unit_of_measurement=UNIT_PERCENT,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_HUMIDITY,
+                state_class=STATE_CLASS_MEASUREMENT
+            ),
+            key=CONF_NAME,
+        ),
 
         cv.Optional(CONF_WARM_MIST): cv.maybe_simple_value(
             switch.switch_schema(
@@ -84,9 +110,9 @@ EHU_COMPONENT_SCHEMA = cv.Schema(
             ),
             key=CONF_NAME,
         ),
-        cv.Optional(CONF_SOUND): cv.maybe_simple_value(
+        cv.Optional(CONF_MUTE): cv.maybe_simple_value(
             switch.switch_schema(
-                EHUSwitch.template(EHUPacketType.PACKET_REQ_SET_SOUND),
+                EHUSwitch.template(EHUPacketType.PACKET_REQ_SET_MUTE),
                 entity_category=ENTITY_CATEGORY_CONFIG,
                 block_inverted=True,
             ),
@@ -122,15 +148,17 @@ async def new_ehu(config):
     await setup_switch(config, CONF_UV, var.set_uv_switch)
     await setup_switch(config, CONF_IONIZER, var.set_ionizer_switch)
     await setup_switch(config, CONF_LOCK, var.set_lock_switch)
-    await setup_switch(config, CONF_SOUND, var.set_sound_switch)
+    await setup_switch(config, CONF_MUTE, var.set_mute_switch)
 
     await setup_binary_sensor(config, CONF_WATER, var.set_water_binary_sensor)
+
+    if CONF_TIME_ID in config:
+        time_ = await cg.get_variable(config[CONF_TIME_ID])
+        cg.add(var.set_time_id(time_))
 
     return var
 
 
 async def to_code(config):
     var = await rka_api.new_api(config, EHUStateRef)
-    if CONF_TIME_ID in config:
-        time_ = await cg.get_variable(config[CONF_TIME_ID])
-        cg.add(var.set_time_id(time_))
+

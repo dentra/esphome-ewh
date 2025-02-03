@@ -6,6 +6,11 @@ namespace esphome {
 namespace ehu {
 #pragma pack(push, 1)
 
+enum : uint8_t {
+  HUMIDITY_MIN = 30,
+  HUMIDITY_MAX = 85,
+};
+
 enum ehu_packet_type_t : uint8_t {
   // aa02 0a 01 b7
   // aa02 0a 00 b6
@@ -14,12 +19,12 @@ enum ehu_packet_type_t : uint8_t {
   // aa02 0b 11 c8
   PACKET_REQ_SET_PRESET = 0x0B,
 
+  // aa02 1a 01 c7 вентилятор минимум
+  // aa02 1a 03 c9 вентилятор макс
   PACKET_REQ_SET_SPEED = 0x1A,
 
-  // aa02 16 01 c3
-  PACKET_REQ_16 = 0x16,
-  // aa02 19 32 f7
-  PACKET_REQ_19 = 0x19,
+  // aa02 19 3c 01 вентилятор среднее
+  PACKET_REQ_SET_SPEED_MID = 0x19,
 
   // aa020f02bd включить UV
   // aa020f00bb выключить UV
@@ -31,7 +36,7 @@ enum ehu_packet_type_t : uint8_t {
   PACKET_REQ_SET_LOCK = 0x14,
   // aa021201bf выключить звук
   // aa021200be включить звук
-  PACKET_REQ_SET_SOUND_OFF = 0x12,
+  PACKET_REQ_SET_MUTE = 0x12,
   // aa021101be включить ионизацию
   // aa021100bd выключить ионизацию
   PACKET_REQ_SET_IONIZER = 0x11,
@@ -68,6 +73,13 @@ enum ehu_packet_type_t : uint8_t {
   // aa031b0c00d4 - 12 часов 00 минут
   // aa031b0c0fe3 - 12 часов 15 минут
   PACKET_REQ_SET_CLOCK = 0x1B,
+
+  // aa02 19 55 1a установить влажность CO - 85%
+  // aa02 19 50 15 установить влажность 80
+  // aa02 19 4b 10 установить влажность 75
+  // aa02 19 46 0b установить влажность 70
+  // aa02 19 41 06 установить влажность 65
+  PACKET_REQ_SET_HUMIDITY = 0x00,
 };
 
 // Response for PACKET_REQ_STATE.
@@ -81,7 +93,7 @@ struct ehu_state_t {
     PRESET_FITNESS = 0x06,     // 06 - фитнес
     PRESET_YOGA = 0x07,        // 07 - YOGA
     PRESET_MEDITATION = 0x08,  // 08 - Медитация
-    PRESET_MEDITATION = 0x0C,  // 0C - Prana Auto
+    PRESET_PRANA = 0x0C,       // 0C - Prana Auto
     PRESET_MANUAL = 0x0F,      // 0F - ручной
   } preset_mode;               // 04
   uint8_t unknown0510[6];      // 05-10 00 00 00 00 00 00
@@ -93,7 +105,7 @@ struct ehu_state_t {
   };
   uint8_t water_flags;  // 13
   bool ionizer : 8;     // 14 Ионизация 00 OFF 01 ON
-  bool sound : 8;       // 15 Звук вкл-выкл
+  bool mute : 8;        // 15 Звук вкл-выкл
   uint8_t unknown16;    // 16 unknown
   bool lock : 8;        // 17 LOCK физ кнопок On-Off
   uint8_t display_mode;  // 18 Отображение температуры или времени при выкл состояние
