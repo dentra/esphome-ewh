@@ -87,6 +87,7 @@ switch:
     water: Water
     fan: Fan
     target_humidity: Target Humidity
+    speed: Speed
 
 ## Uncomment to enable cloud support
 # rka_cloud:

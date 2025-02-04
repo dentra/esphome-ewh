@@ -144,5 +144,14 @@ class EHUTargetHumidity : public number::Number, public Component {
   EHUApi *api_{};
 };
 
+class EHUSpeed : public number::Number, public Component {
+ public:
+  EHUSpeed(EHUApi *api) : api_(api) {}
+  void control(float value) override { this->api_->set_speed(value); }
+
+ protected:
+  EHUApi *api_{};
+};
+
 }  // namespace ehu
 }  // namespace esphome

@@ -6,6 +6,7 @@ from esphome.const import (
     CONF_HUMIDITY,
     CONF_ID,
     CONF_NAME,
+    CONF_SPEED,
     CONF_TEMPERATURE,
     CONF_TIME_ID,
     DEVICE_CLASS_HUMIDITY,
@@ -36,6 +37,7 @@ CONF_WATER = "water"
 CONF_FAN = "fan"
 CONF_TARGET_HUMIDITY = "target_humidity"
 
+
 rka_ns = rka_api.rka_ns
 ehu_ns = cg.esphome_ns.namespace("ehu")
 
@@ -48,6 +50,7 @@ EHUWarmMistSwitch = ehu_ns.class_("EHUWarmMistSwitch", eh_switch.Switch, cg.Comp
 EHUUVSwitch = ehu_ns.class_("EHUUVSwitch", eh_switch.Switch, cg.Component)
 EHUFan = ehu_ns.class_("EHUFan", fan.Fan, cg.Component)
 EHUTargetHumidity = ehu_ns.class_("EHUTargetHumidity", number.Number, cg.Component)
+EHUSpeed = ehu_ns.class_("EHUSpeed", number.Number, cg.Component)
 
 EHUPacketType = ehu_ns.enum("ehu_packet_type_t", is_class=True)
 
@@ -133,6 +136,12 @@ EHU_COMPONENT_SCHEMA = cv.Schema(
             ),
             key=CONF_NAME,
         ),
+        cv.Optional(CONF_SPEED): cv.maybe_simple_value(
+            number.number_schema(
+                EHUSpeed,
+            ),
+            key=CONF_NAME,
+        ),
     }
 ).extend(cv.polling_component_schema("15s"))
 
@@ -193,6 +202,7 @@ async def new_ehu(config):
     await setup_binary_sensor(config, CONF_WATER, var.set_water_binary_sensor)
     await setup_fan(config, CONF_FAN, var.set_fan)
     await setup_number(config, CONF_TARGET_HUMIDITY, var.set_target_humidity, 30, 85)
+    await setup_number(config, CONF_SPEED, var.set_target_humidity, 0, 3)
 
     if CONF_TIME_ID in config:
         time_ = await cg.get_variable(config[CONF_TIME_ID])
