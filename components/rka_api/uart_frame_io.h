@@ -10,6 +10,8 @@
 
 #ifndef RKA_DUMP
 #define RKA_DUMP ESP_LOGV
+#else
+#define RKA_DO_DUMP_TX 1
 #endif
 
 namespace esphome {
@@ -126,7 +128,7 @@ class UartFrameIO {
     crc_type crc = crc_seq.value();
     uart->write_array(reinterpret_cast<uint8_t *>(&crc), sizeof(crc));
     uart->flush();
-#ifdef ESPHOME_LOG_HAS_VERBOSE
+#if defined(ESPHOME_LOG_HAS_VERBOSE) || defined(RKA_DO_DUMP_TX)
     std::string s = format_hex_pretty(reinterpret_cast<uint8_t *>(&hdr), sizeof(hdr));
     s += ' ';
     if (size != 0) {
