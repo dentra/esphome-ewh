@@ -1,11 +1,12 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import binary_sensor, fan, number, sensor, time
+from esphome.components import binary_sensor, fan, number, select, sensor, time
 from esphome.components import switch as eh_switch
 from esphome.const import (
     CONF_HUMIDITY,
     CONF_ID,
     CONF_NAME,
+    CONF_PRESET,
     CONF_SPEED,
     CONF_TEMPERATURE,
     CONF_TIME_ID,
@@ -21,7 +22,16 @@ from esphome.const import (
 from .. import rka_api  # pylint: disable=relative-beyond-top-level
 
 CODEOWNERS = ["@dentra"]
-AUTO_LOAD = ["rka_api", "switch", "binary_sensor", "sensor", "time", "fan", "number"]
+AUTO_LOAD = [
+    "rka_api",
+    "switch",
+    "binary_sensor",
+    "sensor",
+    "time",
+    "fan",
+    "number",
+    "select",
+]
 
 CONF_EHU_ID = "ehu_id"
 
@@ -51,6 +61,7 @@ EHUUVSwitch = ehu_ns.class_("EHUUVSwitch", eh_switch.Switch, cg.Component)
 EHUFan = ehu_ns.class_("EHUFan", fan.Fan, cg.Component)
 EHUTargetHumidity = ehu_ns.class_("EHUTargetHumidity", number.Number, cg.Component)
 EHUSpeed = ehu_ns.class_("EHUSpeed", number.Number, cg.Component)
+EHUPreset = ehu_ns.class_("EHUPreset", select.Select, cg.Component)
 
 EHUPacketType = ehu_ns.enum("ehu_packet_type_t", is_class=True)
 
@@ -139,6 +150,14 @@ EHU_COMPONENT_SCHEMA = cv.Schema(
         cv.Optional(CONF_SPEED): cv.maybe_simple_value(
             number.number_schema(
                 EHUSpeed,
+                icon="mdi:fan",
+            ),
+            key=CONF_NAME,
+        ),
+        cv.Optional(CONF_PRESET): cv.maybe_simple_value(
+            select.select_schema(
+                EHUPreset,
+                icon="mdi:tune",
             ),
             key=CONF_NAME,
         ),
@@ -146,13 +165,13 @@ EHU_COMPONENT_SCHEMA = cv.Schema(
 ).extend(cv.polling_component_schema("15s"))
 
 
-async def setup_sensor(config: dict, key, fn):
+async def setup_sensor(config: dict, key: str, fn):
     if conf := config.get(key, None):
         sens = await sensor.new_sensor(conf)
         cg.add(fn(sens))
 
 
-async def setup_switch(config: dict, key, fn):
+async def setup_switch(config: dict, key: str, fn):
     if key in config:
         parent = await cg.get_variable(config[CONF_ID])
         var = await eh_switch.new_switch(config[key], parent)
@@ -160,27 +179,47 @@ async def setup_switch(config: dict, key, fn):
         cg.add(fn(var))
 
 
-async def setup_binary_sensor(config: dict, key, fn):
+async def setup_binary_sensor(config: dict, key: str, fn):
     if key in config:
         var = await binary_sensor.new_binary_sensor(config[key])
         cg.add(fn(var))
 
 
-async def setup_fan(config: dict, key, fn):
+async def fan_new_fan(config: dict, *args):
+    var = cg.new_Pvariable(config[CONF_ID], *args)
+    await fan.register_fan(var, config)
+    return var
+
+
+async def setup_fan(config: dict, key: str, fn):
     if conf := config.get(key, None):
-        api = await cg.get_variable(config[CONF_EHU_ID])
-        var = cg.new_Pvariable(conf[CONF_ID], api)
-        await fan.register_fan(var, conf)
+        parent = await cg.get_variable(config[CONF_ID])
+        var = await fan_new_fan(conf, parent)
         await cg.register_component(var, conf)
         cg.add(fn(var))
 
 
-async def setup_number(config: dict, key, fn, min_value, max_value, step=1):
+async def setup_number(config: dict, key: str, fn, min_value, max_value, step=1):
     if conf := config.get(key, None):
         api = await cg.get_variable(config[CONF_EHU_ID])
         var = await number.new_number(
             conf, api, min_value=min_value, max_value=max_value, step=step
         )
+        await cg.register_component(var, conf)
+        cg.add(fn(var))
+
+
+async def select_new_select(config: dict, *args, options: list[str]):
+    # var = await select.new_select(conf, parent, options=options)
+    var = cg.new_Pvariable(config[CONF_ID], *args)
+    await select.register_select(var, config, options=options)
+    return var
+
+
+async def setup_select(config: dict, key: str, fn, options: list[str]):
+    if conf := config.get(key, None):
+        parent = await cg.get_variable(config[CONF_ID])
+        var = await select_new_select(conf, parent, options=options)
         await cg.register_component(var, conf)
         cg.add(fn(var))
 
@@ -202,7 +241,8 @@ async def new_ehu(config):
     await setup_binary_sensor(config, CONF_WATER, var.set_water_binary_sensor)
     await setup_fan(config, CONF_FAN, var.set_fan)
     await setup_number(config, CONF_TARGET_HUMIDITY, var.set_target_humidity, 30, 85)
-    await setup_number(config, CONF_SPEED, var.set_target_humidity, 0, 3)
+    await setup_number(config, CONF_SPEED, var.set_speed, 0, 3)
+    await setup_select(config, CONF_PRESET, var.set_preset, [])
 
     if CONF_TIME_ID in config:
         time_ = await cg.get_variable(config[CONF_TIME_ID])

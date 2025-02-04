@@ -7,6 +7,7 @@
 #include "esphome/components/switch/switch.h"
 #include "esphome/components/fan/fan.h"
 #include "esphome/components/number/number.h"
+#include "esphome/components/select/select.h"
 
 #ifdef USE_TIME
 #include "esphome/components/time/real_time_clock.h"
@@ -24,6 +25,8 @@ class EHUComponent : public EHUComponentBase {
   template<uint16_t cmd_v> friend class EHUSwitch;
   friend class EHUWarmMistSwitch;
   friend class EHUUVSwitch;
+  friend class EHUFan;
+  friend class EHUPreset;
 
  public:
   explicit EHUComponent(EHUApi *api) : EHUComponentBase(api) {}
@@ -49,6 +52,8 @@ class EHUComponent : public EHUComponentBase {
   void set_fan(fan::Fan *fan) { this->fan_ = fan; }
 
   void set_target_humidity(number::Number *target_humidity) { this->target_humidity_ = target_humidity; }
+  void set_speed(number::Number *speed) { this->speed_ = speed; }
+  void set_preset(select::Select *preset) { this->preset_ = preset; }
 
  protected:
 #ifdef USE_TIME
@@ -69,6 +74,8 @@ class EHUComponent : public EHUComponentBase {
   fan::Fan *fan_{};
 
   number::Number *target_humidity_{};
+  number::Number *speed_{};
+  select::Select *preset_{};
 
   void dump_config_(const char *TAG) const;
 
@@ -79,6 +86,8 @@ class EHUComponent : public EHUComponentBase {
   }
 
   void publish_fan_state_(const ehu_state_t &state);
+  void write_preset_(const std::string &preset) const;
+  const std::string &get_preset_(const ehu_state_t &state) const;
 };
 
 template<uint16_t cmd_v> class EHUSwitch : public switch_::Switch, public Component, public Parented<EHUComponent> {
@@ -125,32 +134,30 @@ class EHUUVSwitch : public EHUWaterSwitchBase<ehu_state_t::WATER_UV, ehu_state_t
   EHUUVSwitch(EHUComponent *c) : EHUWaterSwitchBase(c, c->warm_mist_) {}
 };
 
-class EHUFan : public Component, public fan::Fan {
+class EHUFan : public Component, public fan::Fan, Parented<EHUComponent> {
  public:
-  explicit EHUFan(EHUApi *api) : api_(api) {}
+  explicit EHUFan(EHUComponent *c) : Parented(c) {}
   fan::FanTraits get_traits() override;
   void control(const fan::FanCall &call) override;
-
- protected:
-  EHUApi *api_{};
 };
 
-class EHUTargetHumidity : public number::Number, public Component {
+class EHUTargetHumidity : public number::Number, public Component, Parented<EHUApi> {
  public:
-  EHUTargetHumidity(EHUApi *api) : api_(api) {}
-  void control(float value) override { this->api_->set_humidity(value); }
-
- protected:
-  EHUApi *api_{};
+  EHUTargetHumidity(EHUApi *api) : Parented(api) {}
+  void control(float value) override { this->parent_->set_humidity(value); }
 };
 
-class EHUSpeed : public number::Number, public Component {
+class EHUSpeed : public number::Number, public Component, Parented<EHUApi> {
  public:
-  EHUSpeed(EHUApi *api) : api_(api) {}
-  void control(float value) override { this->api_->set_speed(value); }
+  EHUSpeed(EHUApi *api) : Parented(api) {}
+  void control(float value) override { this->parent_->set_speed(value); }
+};
 
- protected:
-  EHUApi *api_{};
+class EHUPreset : public select::Select, public Component, Parented<EHUComponent> {
+ public:
+  EHUPreset(EHUComponent *c) : Parented(c) {}
+  void setup() override;
+  void control(const std::string &value) override { this->parent_->write_preset_(value); }
 };
 
 }  // namespace ehu

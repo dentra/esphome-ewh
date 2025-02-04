@@ -10,6 +10,7 @@ namespace ehu {
 
 static const char *const TAG = "ehu.component";
 
+static const std::string PRESET__EMPTY = "";
 static const std::string PRESET_AUTO = "Auto";              // 01 - AUTO
 static const std::string PRESET_HEALTH = "Health";          // 02 - Здоровье
 static const std::string PRESET_NIGHT = "Night";            // 03 - NIGHT
@@ -19,6 +20,12 @@ static const std::string PRESET_YOGA = "Yoga";              // 07 - YOGA
 static const std::string PRESET_MEDITATION = "Meditation";  // 08 - Медитация
 static const std::string PRESET_PRANA = "Prana";            // 0C - Prana
 static const std::string PRESET_MANUAL = "Manual";          // 0F - ручной
+
+#define ALL_PRESETS \
+  { \
+    PRESET_AUTO, PRESET_HEALTH, PRESET_NIGHT, PRESET_BABY, PRESET_FITNESS, PRESET_YOGA, PRESET_MEDITATION, \
+        PRESET_PRANA, PRESET_MANUAL, \
+  }
 
 void EHUComponent::dump_config_(const char *TAG) const {
   LOG_SENSOR("  ", "Temperature", this->temperature_);
@@ -53,6 +60,10 @@ void EHUComponent::on_state(const ehu_state_t &state) {
   this->publish_state_(this->water_, !state.water_tank_empty);
   this->publish_fan_state_(state);
   this->publish_state_(this->target_humidity_, state.target_humidity);
+  this->publish_state_(this->speed_, state.fan_speed);
+  if (this->preset_) {
+    this->preset_->publish_state(this->get_preset_(state));
+  }
 }
 
 void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
@@ -72,39 +83,7 @@ void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
     has_changes = true;
   }
 
-  std::string preset{};
-  switch (state.preset) {
-    case ehu_state_t::PRESET_AUTO:
-      preset = PRESET_AUTO;
-      break;
-    case ehu_state_t::PRESET_BABY:
-      preset = PRESET_BABY;
-      break;
-    case ehu_state_t::PRESET_FITNESS:
-      preset = PRESET_FITNESS;
-      break;
-    case ehu_state_t::PRESET_HEALTH:
-      preset = PRESET_HEALTH;
-      break;
-    case ehu_state_t::PRESET_MANUAL:
-      preset = PRESET_MANUAL;
-      break;
-    case ehu_state_t::PRESET_MEDITATION:
-      preset = PRESET_MEDITATION;
-      break;
-    case ehu_state_t::PRESET_NIGHT:
-      preset = PRESET_NIGHT;
-      break;
-    case ehu_state_t::PRESET_PRANA:
-      preset = PRESET_PRANA;
-      break;
-    case ehu_state_t::PRESET_YOGA:
-      preset = PRESET_YOGA;
-      break;
-    default:
-      // pass
-      break;
-  }
+  auto &preset = this->get_preset_(state);
   if (preset != this->fan_->preset_mode) {
     this->fan_->preset_mode = preset;
     has_changes = true;
@@ -115,56 +94,77 @@ void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
   }
 }
 
+const std::string &EHUComponent::get_preset_(const ehu_state_t &state) const {
+  switch (state.preset) {
+    case ehu_state_t::PRESET_AUTO:
+      return PRESET_AUTO;
+    case ehu_state_t::PRESET_BABY:
+      return PRESET_BABY;
+    case ehu_state_t::PRESET_FITNESS:
+      return PRESET_FITNESS;
+    case ehu_state_t::PRESET_HEALTH:
+      return PRESET_HEALTH;
+    case ehu_state_t::PRESET_MANUAL:
+      return PRESET_MANUAL;
+    case ehu_state_t::PRESET_MEDITATION:
+      return PRESET_MEDITATION;
+    case ehu_state_t::PRESET_NIGHT:
+      return PRESET_NIGHT;
+    case ehu_state_t::PRESET_PRANA:
+      return PRESET_PRANA;
+    case ehu_state_t::PRESET_YOGA:
+      return PRESET_YOGA;
+    default:
+      return PRESET__EMPTY;
+  }
+}
+
+void EHUComponent::write_preset_(const std::string &preset) const {
+  if (preset.empty()) {
+    return;
+  }
+  if (preset == PRESET_AUTO) {
+    this->api_->set_preset(ehu_state_t::PRESET_AUTO);
+  } else if (preset == PRESET_HEALTH) {
+    this->api_->set_preset(ehu_state_t::PRESET_HEALTH);
+  } else if (preset == PRESET_NIGHT) {
+    this->api_->set_preset(ehu_state_t::PRESET_NIGHT);
+  } else if (preset == PRESET_BABY) {
+    this->api_->set_preset(ehu_state_t::PRESET_BABY);
+  } else if (preset == PRESET_FITNESS) {
+    this->api_->set_preset(ehu_state_t::PRESET_FITNESS);
+  } else if (preset == PRESET_YOGA) {
+    this->api_->set_preset(ehu_state_t::PRESET_YOGA);
+  } else if (preset == PRESET_MEDITATION) {
+    this->api_->set_preset(ehu_state_t::PRESET_MEDITATION);
+  } else if (preset == PRESET_PRANA) {
+    this->api_->set_preset(ehu_state_t::PRESET_PRANA);
+  } else {
+    this->api_->set_preset(ehu_state_t::PRESET_MANUAL);
+  }
+}
+
+void EHUFan::control(const fan::FanCall &call) {
+  if (call.get_state().has_value() && !*call.get_state()) {
+    this->parent_->api_->set_speed(0);
+  }
+
+  if (call.get_speed().has_value()) {
+    this->parent_->api_->set_speed(*call.get_speed());
+  }
+
+  this->parent_->write_preset_(call.get_preset_mode());
+}
+
 fan::FanTraits EHUFan::get_traits() {
   auto traits = fan::FanTraits();
   traits.set_speed(true);
   traits.set_supported_speed_count(3);
-  traits.set_supported_preset_modes({
-      PRESET_AUTO,
-      PRESET_HEALTH,
-      PRESET_NIGHT,
-      PRESET_BABY,
-      PRESET_FITNESS,
-      PRESET_YOGA,
-      PRESET_MEDITATION,
-      PRESET_PRANA,
-      PRESET_MANUAL,
-  });
+  traits.set_supported_preset_modes(ALL_PRESETS);
   return traits;
 }
 
-void EHUFan::control(const fan::FanCall &call) {
-  if (call.get_state().has_value()) {
-    this->api_->set_speed(0);
-  }
-
-  if (call.get_speed().has_value()) {
-    this->api_->set_speed(*call.get_speed());
-  }
-
-  auto preset = call.get_preset_mode();
-  if (!preset.empty()) {
-    if (preset == PRESET_AUTO) {
-      this->api_->set_preset(ehu_state_t::PRESET_AUTO);
-    } else if (preset == PRESET_HEALTH) {
-      this->api_->set_preset(ehu_state_t::PRESET_HEALTH);
-    } else if (preset == PRESET_NIGHT) {
-      this->api_->set_preset(ehu_state_t::PRESET_NIGHT);
-    } else if (preset == PRESET_BABY) {
-      this->api_->set_preset(ehu_state_t::PRESET_BABY);
-    } else if (preset == PRESET_FITNESS) {
-      this->api_->set_preset(ehu_state_t::PRESET_FITNESS);
-    } else if (preset == PRESET_YOGA) {
-      this->api_->set_preset(ehu_state_t::PRESET_YOGA);
-    } else if (preset == PRESET_MEDITATION) {
-      this->api_->set_preset(ehu_state_t::PRESET_MEDITATION);
-    } else if (preset == PRESET_PRANA) {
-      this->api_->set_preset(ehu_state_t::PRESET_PRANA);
-    } else {
-      this->api_->set_preset(ehu_state_t::PRESET_MANUAL);
-    }
-  }
-}
+void EHUPreset::setup() { this->traits.set_options(ALL_PRESETS); }
 
 }  // namespace ehu
 }  // namespace esphome

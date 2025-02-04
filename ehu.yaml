@@ -85,9 +85,10 @@ switch:
     lock: Lock
     mute: Mute
     water: Water
-    fan: Fan
     target_humidity: Target Humidity
     speed: Speed
+    preset: Preset
+    fan: Fan
 
 ## Uncomment to enable cloud support
 # rka_cloud:
