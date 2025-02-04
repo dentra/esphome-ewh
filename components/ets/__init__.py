@@ -25,9 +25,9 @@ ets_ns = cg.esphome_ns.namespace("ets")
 
 ETSApi = ets_ns.class_("ETSApi", cg.Component)
 ETSComponent = ets_ns.class_("ETSComponent", cg.PollingComponent)
-ETSStateRef = ets_ns.struct("ets_state_t").operator("const").operator("ref")
+ETSState = ets_ns.struct("ets_state_t")
 ETSUpdateTrigger = ets_ns.class_(
-    "ETSUpdateTrigger", automation.Trigger.template(ETSStateRef)
+    "ETSUpdateTrigger", automation.Trigger.template(rka_api.obj_const_ref(ETSState))
 )
 
 
@@ -61,4 +61,4 @@ async def new_ets(config):
 
 
 async def to_code(config):
-    var = await rka_api.new_api(config, ETSStateRef)
+    var = await rka_api.new_api(config, ETSState)

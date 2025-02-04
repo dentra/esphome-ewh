@@ -9,10 +9,16 @@ CODEOWNERS = ["@dentra"]
 DEPENDENCIES = ["vport"]
 AUTO_LOAD = ["etl"]
 
+rka_ns = cg.esphome_ns.namespace("rka_api")
 
-def api_schema(
-    api_class, default_update_interval=None, trigger_class=None
-) -> cv.Schema:
+def obj_const_ref(class_: cg.MockObjClass):
+    return class_.operator("const").operator("ref")
+
+def update_trigger(apiClass: cg.MockObjClass, stateStruct: cg.MockObjClass):
+    return rka_ns.class_("RKAUpdateTrigger", automation.Trigger.template(apiClass)).template(apiClass, stateStruct)
+
+
+def api_schema(api_class, trigger_class=None) -> cv.Schema:
     schema = cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(api_class),
@@ -26,18 +32,17 @@ def api_schema(
                 )
             }
         )
-    if default_update_interval is None:
-        schema = schema.extend(cv.COMPONENT_SCHEMA)
-    else:
-        schema = schema.extend(cv.polling_component_schema(default_update_interval))
+    # FIXME do we need COMPONENT_SCHEMA here?
+    schema = schema.extend(cv.COMPONENT_SCHEMA)
     return schema
 
 
-async def new_api(config, state_ref_class: None):
+async def new_api(config, state_class: None):
     prt = await vport.vport_get_var(config)
     var = cg.new_Pvariable(config[CONF_ID], prt)
     # await cg.register_component(var, config)
-    if state_ref_class is not None:
+    if state_class is not None:
+        state_ref_class = obj_const_ref(state_class)
         for conf in config.get(CONF_ON_STATE, []):
             trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
             await automation.build_automation(

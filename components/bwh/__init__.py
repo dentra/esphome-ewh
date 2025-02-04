@@ -18,9 +18,9 @@ bwh_ns = cg.esphome_ns.namespace("bwh")
 BWHApi = bwh_ns.class_("BWHApi", cg.Component)
 BWHComponent = bwh_ns.class_("EWHComponent", cg.Component)
 
-BWHStateRef = bwh_ns.struct("ewh_state_t").operator("const").operator("ref")
+BWHState = bwh_ns.struct("ewh_state_t")
 BWHUpdateTrigger = bwh_ns.class_(
-    "EWHUpdateTrigger", automation.Trigger.template(BWHStateRef)
+    "EWHUpdateTrigger", automation.Trigger.template(rka_api.obj_const_ref(BWHState))
 )
 
 CONFIG_SCHEMA = rka_api.api_schema(BWHApi, trigger_class=BWHUpdateTrigger)
@@ -42,7 +42,7 @@ async def new_bwh(config):
 
 
 async def to_code(config):
-    var = await rka_api.new_api(config, BWHStateRef)
+    var = await rka_api.new_api(config, BWHState)
     if CONF_TIME_ID in config:
         time_ = await cg.get_variable(config[CONF_TIME_ID])
         cg.add(var.set_time_id(time_))
