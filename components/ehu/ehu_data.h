@@ -111,7 +111,7 @@ struct ehu_state_t {
   uint8_t _led2;              // 20 Тоже подсветка (бак или нижняя ???)
   uint8_t _demo_mode;         // 21 Режим демонстрации (bool???)
   uint8_t _led3;              // 22 Подсветка 0A
-  uint8_t _manual_value;      // 23 Значение ручного режима
+  uint8_t target_humidity;    // 23 Целевая влажность
   uint8_t fan_speed;          // 24 Скорость вентилятора
   uint8_t clock_hours;        // 25 Часы
   uint8_t clock_minutes;      // 26 Минуты
@@ -124,6 +124,8 @@ struct ehu_state_t {
   uint8_t _unknown3550[16];   // 35-41 00 00 00 00 14 00 00 14 00 00 14 00 00 00 00 00 00
   bool _remote_control : 8;   // 51 Удаленное управление - вкл 1 или выкл 00
 };
+
+// aa3288010f00000000001400000000000000000000000032
 
 // aa3288...
 static_assert(sizeof(ehu_state_t) == 0x32 /*len*/ - 1 /*cmd:88*/);

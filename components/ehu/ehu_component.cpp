@@ -52,7 +52,7 @@ void EHUComponent::on_state(const ehu_state_t &state) {
   this->publish_state_(this->mute_, state.mute);
   this->publish_state_(this->water_, !state.water_tank_empty);
   this->publish_fan_state_(state);
-  // this->publish_state_(this->target_humidity_, state.target_humidity_);
+  this->publish_state_(this->target_humidity_, state.target_humidity);
 }
 
 void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
