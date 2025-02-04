@@ -5,6 +5,7 @@
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
 #include "esphome/components/switch/switch.h"
+#include "esphome/components/fan/fan.h"
 
 #ifdef USE_TIME
 #include "esphome/components/time/real_time_clock.h"
@@ -44,6 +45,8 @@ class EHUComponent : public EHUComponentBase {
 
   void set_water_binary_sensor(binary_sensor::BinarySensor *water) { this->water_ = water; }
 
+  void set_fan(fan::Fan *fan) { this->fan_ = fan; }
+
  protected:
 #ifdef USE_TIME
   esphome::time::RealTimeClock *time_{};
@@ -60,11 +63,17 @@ class EHUComponent : public EHUComponentBase {
 
   binary_sensor::BinarySensor *water_{};
 
+  fan::Fan *fan_{};
+
+  void dump_config_(const char *TAG) const;
+
   template<class T, typename V> inline void publish_state_(T *var, V val) {
     if (var != nullptr && static_cast<V>(var->state) != val) {
       var->publish_state(val);
     }
   }
+
+  void publish_fan_state_(const ehu_state_t &state);
 };
 
 template<uint16_t cmd_v> class EHUSwitch : public switch_::Switch, public Component, public Parented<EHUComponent> {
@@ -109,6 +118,16 @@ class EHUWarmMistSwitch : public EHUWaterSwitchBase<ehu_state_t::WATER_WARM_MIST
 class EHUUVSwitch : public EHUWaterSwitchBase<ehu_state_t::WATER_UV, ehu_state_t::WATER_WARM_MIST> {
  public:
   EHUUVSwitch(EHUComponent *c) : EHUWaterSwitchBase(c, c->warm_mist_) {}
+};
+
+class EHUFan : public Component, public fan::Fan {
+ public:
+  explicit EHUFan(EHUApi *api) : api_(api) {}
+  fan::FanTraits get_traits() override;
+  void control(const fan::FanCall &call) override;
+
+ protected:
+  EHUApi *api_{};
 };
 
 }  // namespace ehu

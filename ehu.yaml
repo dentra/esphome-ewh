@@ -68,9 +68,15 @@ uart:
 vport:
   - platform: ehu
 
-fan:
+## Use this template for custom action on state event.
+# ehu:
+#   on_state:
+#     lambda: |-
+#       ESP_LOGI("main", "power state %s", ONOFF(state.power));
+
+switch:
   - platform: ehu
-    name: Fan
+    name: Power
     temperature: Temperature
     humidity: Humidity
     warm_mist: Warm Mist
@@ -79,6 +85,7 @@ fan:
     lock: Lock
     mute: Mute
     water: Water
+    fan: Fan
 
 ## Uncomment to enable cloud support
 # rka_cloud:

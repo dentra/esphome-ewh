@@ -23,9 +23,6 @@ enum ehu_packet_type_t : uint8_t {
   // aa02 1a 03 c9 вентилятор макс
   PACKET_REQ_SET_SPEED = 0x1A,
 
-  // aa02 19 3c 01 вентилятор среднее
-  PACKET_REQ_SET_SPEED_MID = 0x19,
-
   // aa020f02bd включить UV
   // aa020f00bb выключить UV
   // aa020f01bc warm mist включить
@@ -79,10 +76,11 @@ enum ehu_packet_type_t : uint8_t {
   // aa02 19 4b 10 установить влажность 75
   // aa02 19 46 0b установить влажность 70
   // aa02 19 41 06 установить влажность 65
-  PACKET_REQ_SET_HUMIDITY = 0x00,
+  PACKET_REQ_SET_HUMIDITY = 0x19,
 };
 
 // Response for PACKET_REQ_STATE.
+// поля начинающиеся с подчеркивания пока не используются
 struct ehu_state_t {
   bool power : 8;  // 03
   enum : uint8_t {
@@ -95,10 +93,10 @@ struct ehu_state_t {
     PRESET_MEDITATION = 0x08,  // 08 - Медитация
     PRESET_PRANA = 0x0C,       // 0C - Prana Auto
     PRESET_MANUAL = 0x0F,      // 0F - ручной
-  } preset_mode;               // 04
-  uint8_t unknown0510[6];      // 05-10 00 00 00 00 00 00
-  uint8_t fitness;             // 11 Активно при режиме фитнес (bool???)
-  uint8_t fitness_time;        // 12 Время минуты в режиме YOGA или фитнес
+  } preset;                    // 04
+  uint8_t _unknown0510[6];     // 05-10 00 00 00 00 00 00
+  uint8_t _fitness;            // 11 Активно при режиме фитнес (bool???)
+  uint8_t _fitness_time;       // 12 Время минуты в режиме YOGA или фитнес
   enum : uint8_t {
     WATER_WARM_MIST = 1 << 0,  // 01 - Теплый пар
     WATER_UV = 1 << 1,         // 02 - Ультрафиолетовая лампа
@@ -106,25 +104,25 @@ struct ehu_state_t {
   uint8_t water_flags;  // 13
   bool ionizer : 8;     // 14 Ионизация 00 OFF 01 ON
   bool mute : 8;        // 15 Звук вкл-выкл
-  uint8_t unknown16;    // 16 unknown
+  uint8_t _unknown16;   // 16 unknown
   bool lock : 8;        // 17 LOCK физ кнопок On-Off
-  uint8_t display_mode;  // 18 Отображение температуры или времени при выкл состояние
-  uint8_t led1;               // 19 Подсветка цвет от 0 до 4 (бак или нижняя ???)
-  uint8_t led2;               // 20 Тоже подсветка (бак или нижняя ???)
-  uint8_t demo_mode;          // 21 Режим демонстрации (bool???)
-  uint8_t led3;               // 22 Подсветка 0A
-  uint8_t manual_value;       // 23 Значение ручного режима
+  uint8_t _display_mode;  // 18 Отображение температуры или времени при выкл состояние
+  uint8_t _led1;              // 19 Подсветка цвет от 0 до 4 (бак или нижняя ???)
+  uint8_t _led2;              // 20 Тоже подсветка (бак или нижняя ???)
+  uint8_t _demo_mode;         // 21 Режим демонстрации (bool???)
+  uint8_t _led3;              // 22 Подсветка 0A
+  uint8_t _manual_value;      // 23 Значение ручного режима
   uint8_t fan_speed;          // 24 Скорость вентилятора
   uint8_t clock_hours;        // 25 Часы
   uint8_t clock_minutes;      // 26 Минуты
   uint8_t temperature;        // 27 Датчик Температуры
   uint8_t humidity;           // 28 Датчик влажности %
   bool water_tank_empty : 8;  // 29 01 если нет воды else 00
-  uint8_t unknown3032[3];     // 30-32 00 00 0A
-  uint8_t timer_hours;        // 33 Будильник часы
-  uint8_t timer_minutes;      // 34 Будильник минуты
-  uint8_t unknown3550[16];    // 35-41 00 00 00 00 14 00 00 14 00 00 14 00 00 00 00 00 00
-  bool remote_control : 8;    // 51 Удаленное управление - вкл 1 или выкл 00
+  uint8_t _unknown3032[3];    // 30-32 00 00 0A
+  uint8_t _timer_hours;       // 33 Будильник часы
+  uint8_t _timer_minutes;     // 34 Будильник минуты
+  uint8_t _unknown3550[16];   // 35-41 00 00 00 00 14 00 00 14 00 00 14 00 00 00 00 00 00
+  bool _remote_control : 8;   // 51 Удаленное управление - вкл 1 или выкл 00
 };
 
 // aa3288...
