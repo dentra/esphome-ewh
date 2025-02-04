@@ -97,18 +97,18 @@ Humidifier components allows the following:
 
 - Control on/off
 - Control fan speed
+- Control target humidity
+- Monitor current humidity
+- Monitor current temperature
 - Control presets
-- Control internal presets
 - Control warm mist
 - Control UV
 - Control ionizer
 - Control lock
 - Control mute
-- Control target humidity
-- Monitor humidity
-- Monitor temperature
 - Monitor empty water tank
-- Control clock
+- Control LED mode, presets and brightness
+- Adjust clock
 
 ## Thermostat
 

@@ -89,6 +89,10 @@ switch:
     speed: Speed
     preset: Preset
     fan: Fan
+    led_brightness: Led Brightness
+    led_top: Led Top
+    led_bottom: Led Bottom
+    led_preset: Led Preset
 
 ## Uncomment to enable cloud support
 # rka_cloud:

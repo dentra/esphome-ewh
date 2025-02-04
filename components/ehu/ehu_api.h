@@ -34,6 +34,7 @@ class EHUApi : public EHUApiBase {
   void set_mute(bool mute);
 
   void set_clock(uint8_t hours, uint8_t minutes);
+  void set_led_preset(uint8_t led_preset);
 };
 
 }  // namespace ehu

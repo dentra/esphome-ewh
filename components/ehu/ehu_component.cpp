@@ -21,11 +21,19 @@ static const std::string PRESET_MEDITATION = "Meditation";  // 08 - Медита
 static const std::string PRESET_PRANA = "Prana";            // 0C - Prana
 static const std::string PRESET_MANUAL = "Manual";          // 0F - ручной
 
-#define ALL_PRESETS \
+static const std::string LED_PRESET_RANDOM = "Random";  // 01 - случайный цвет
+static const std::string LED_PRESET_BLUE = "Blue";      // 02 - синий
+static const std::string LED_PRESET_GREEN = "Green";    // 03 - зеленый
+static const std::string LED_PRESET_WHITE = "White";    // 04 - белый.
+
+#define ALL_FAN_PRESETS \
   { \
     PRESET_AUTO, PRESET_HEALTH, PRESET_NIGHT, PRESET_BABY, PRESET_FITNESS, PRESET_YOGA, PRESET_MEDITATION, \
         PRESET_PRANA, PRESET_MANUAL, \
   }
+
+#define ALL_LED_PRESETS \
+  { LED_PRESET_RANDOM, LED_PRESET_BLUE, LED_PRESET_GREEN, LED_PRESET_WHITE }
 
 void EHUComponent::dump_config_(const char *TAG) const {
   LOG_SENSOR("  ", "Temperature", this->temperature_);
@@ -37,6 +45,13 @@ void EHUComponent::dump_config_(const char *TAG) const {
   LOG_SWITCH("  ", "Mute", this->mute_);
   LOG_BINARY_SENSOR("  ", "Water", this->water_);
   // LOG_FAN("  ", "Fan", this->fan_);
+  LOG_NUMBER("  ", "Target Humidity", this->target_humidity_);
+  LOG_NUMBER("  ", "Speed", this->fan_speed_);
+  LOG_SELECT("  ", "Preset", this->fan_preset_);
+  LOG_NUMBER("  ", "LED Brightness", this->led_brightness_);
+  LOG_SWITCH("  ", "LED Top", this->led_top_);
+  LOG_SWITCH("  ", "LED Bottom", this->led_bottom_);
+  LOG_SELECT("  ", "LED Preset", this->led_preset_);
 }
 
 void EHUComponent::on_state(const ehu_state_t &state) {
@@ -60,9 +75,21 @@ void EHUComponent::on_state(const ehu_state_t &state) {
   this->publish_state_(this->water_, !state.water_tank_empty);
   this->publish_fan_state_(state);
   this->publish_state_(this->target_humidity_, state.target_humidity);
-  this->publish_state_(this->speed_, state.fan_speed);
-  if (this->preset_) {
-    this->preset_->publish_state(this->get_preset_(state));
+  this->publish_state_(this->fan_speed_, state.fan_speed);
+  if (this->fan_preset_) {
+    auto &preset = this->get_fan_preset_(state);
+    if (!preset.empty()) {
+      this->fan_preset_->publish_state(preset);
+    }
+  }
+  this->publish_state_(this->led_brightness_, state.led_brightness);
+  this->publish_state_(this->led_top_, state.led_mode & ehu_state_t::LED_MODE_TOP);
+  this->publish_state_(this->led_bottom_, state.led_mode & ehu_state_t::LED_MODE_BOTTOM);
+  if (this->led_preset_) {
+    auto &preset = this->get_led_preset_(state);
+    if (!preset.empty()) {
+      this->led_preset_->publish_state(preset);
+    }
   }
 }
 
@@ -83,7 +110,7 @@ void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
     has_changes = true;
   }
 
-  auto &preset = this->get_preset_(state);
+  auto &preset = this->get_fan_preset_(state);
   if (preset != this->fan_->preset_mode) {
     this->fan_->preset_mode = preset;
     has_changes = true;
@@ -94,7 +121,7 @@ void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
   }
 }
 
-const std::string &EHUComponent::get_preset_(const ehu_state_t &state) const {
+const std::string &EHUComponent::get_fan_preset_(const ehu_state_t &state) const {
   switch (state.preset) {
     case ehu_state_t::PRESET_AUTO:
       return PRESET_AUTO;
@@ -115,11 +142,12 @@ const std::string &EHUComponent::get_preset_(const ehu_state_t &state) const {
     case ehu_state_t::PRESET_YOGA:
       return PRESET_YOGA;
     default:
+      ESP_LOGW(TAG, "Unknown fan preset %u", state.led_preset);
       return PRESET__EMPTY;
   }
 }
 
-void EHUComponent::write_preset_(const std::string &preset) const {
+void EHUComponent::write_fan_preset_(const std::string &preset) const {
   if (preset.empty()) {
     return;
   }
@@ -144,6 +172,22 @@ void EHUComponent::write_preset_(const std::string &preset) const {
   }
 }
 
+const std::string &EHUComponent::get_led_preset_(const ehu_state_t &state) const {
+  switch (state.led_preset) {
+    case ehu_state_t::LED_PRESET_RANDOM:
+      return LED_PRESET_RANDOM;
+    case ehu_state_t::LED_PRESET_BLUE:
+      return LED_PRESET_BLUE;
+    case ehu_state_t::LED_PRESET_GREEN:
+      return LED_PRESET_GREEN;
+    case ehu_state_t::LED_PRESET_WHITE:
+      return LED_PRESET_WHITE;
+    default:
+      ESP_LOGW(TAG, "Unknown LED preset %u", state.led_preset);
+      return PRESET__EMPTY;
+  }
+}
+
 void EHUFan::control(const fan::FanCall &call) {
   if (call.get_state().has_value() && !*call.get_state()) {
     this->parent_->api_->set_speed(0);
@@ -153,18 +197,37 @@ void EHUFan::control(const fan::FanCall &call) {
     this->parent_->api_->set_speed(*call.get_speed());
   }
 
-  this->parent_->write_preset_(call.get_preset_mode());
+  this->parent_->write_fan_preset_(call.get_preset_mode());
 }
 
 fan::FanTraits EHUFan::get_traits() {
   auto traits = fan::FanTraits();
   traits.set_speed(true);
   traits.set_supported_speed_count(3);
-  traits.set_supported_preset_modes(ALL_PRESETS);
+  traits.set_supported_preset_modes(ALL_FAN_PRESETS);
   return traits;
 }
 
-void EHUPreset::setup() { this->traits.set_options(ALL_PRESETS); }
+void EHUFanPreset::setup() { this->traits.set_options(ALL_FAN_PRESETS); }
+
+void EHULedPreset::setup() { this->traits.set_options(ALL_LED_PRESETS); }
+
+void EHULedPreset::control(const std::string &value) {
+  if (value.empty()) {
+    return;
+  }
+  if (value == LED_PRESET_RANDOM) {
+    this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_RANDOM);
+  } else if (value == LED_PRESET_BLUE) {
+    this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_BLUE);
+  } else if (value == LED_PRESET_GREEN) {
+    this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_GREEN);
+  } else if (value == LED_PRESET_WHITE) {
+    this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_WHITE);
+  } else {
+    ESP_LOGW(TAG, "Unknown led preset %s", value.c_str());
+  }
+}
 
 }  // namespace ehu
 }  // namespace esphome

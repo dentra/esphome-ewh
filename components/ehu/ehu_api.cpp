@@ -56,5 +56,10 @@ void EHUApi::set_clock(uint8_t hours, uint8_t minutes) {
   this->write(ehu_packet_type_t::PACKET_REQ_SET_CLOCK, data);
 }
 
+void EHUApi::set_led_preset(uint8_t led_preset) {
+  ESP_LOGD(TAG, "Set led preset to %u", led_preset);
+  this->write_byte(ehu_packet_type_t::PACKET_REQ_SET_LED_PRESET, led_preset);
+}
+
 }  // namespace ehu
 }  // namespace esphome
