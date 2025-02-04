@@ -86,6 +86,7 @@ switch:
     mute: Mute
     water: Water
     fan: Fan
+    target_humidity: Target Humidity
 
 ## Uncomment to enable cloud support
 # rka_cloud:

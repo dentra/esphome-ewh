@@ -5,6 +5,9 @@
 namespace esphome {
 namespace ehu {
 
+// выкл значка wifi AA 02 03 02 CC
+// вкл значок wifi AA 02 03 03 CC
+
 static const char *const TAG = "ehu.component";
 
 static const std::string PRESET_AUTO = "Auto";              // 01 - AUTO
@@ -48,8 +51,8 @@ void EHUComponent::on_state(const ehu_state_t &state) {
   this->publish_state_(this->lock_, state.lock);
   this->publish_state_(this->mute_, state.mute);
   this->publish_state_(this->water_, !state.water_tank_empty);
-
   this->publish_fan_state_(state);
+  // this->publish_state_(this->target_humidity_, state.target_humidity_);
 }
 
 void EHUComponent::publish_fan_state_(const ehu_state_t &state) {

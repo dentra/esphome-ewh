@@ -93,20 +93,22 @@ Connection with USB 2.0 may work or may not, depending on your device revision.
 >
 > The important part of the connection that you need is to short SSRX+ and GND_DRAIN or simply try to short SSRX+ and GND.
 
-Humidifier components are build using `fan` platform and allows the following:
+Humidifier components allows the following:
 
 - Control on/off
 - Control fan speed
+- Control presets
 - Control internal presets
 - Control warm mist
 - Control UV
 - Control ionizer
 - Control lock
 - Control mute
+- Control target humidity
 - Monitor humidity
 - Monitor temperature
 - Monitor empty water tank
-- Update clock
+- Control clock
 
 ## Thermostat
 

@@ -11,11 +11,15 @@ AUTO_LOAD = ["etl"]
 
 rka_ns = cg.esphome_ns.namespace("rka_api")
 
+
 def obj_const_ref(class_: cg.MockObjClass):
     return class_.operator("const").operator("ref")
 
+
 def update_trigger(apiClass: cg.MockObjClass, stateStruct: cg.MockObjClass):
-    return rka_ns.class_("RKAUpdateTrigger", automation.Trigger.template(apiClass)).template(apiClass, stateStruct)
+    return rka_ns.class_(
+        "RKAUpdateTrigger", automation.Trigger.template(apiClass)
+    ).template(apiClass, stateStruct)
 
 
 def api_schema(api_class, trigger_class=None) -> cv.Schema:

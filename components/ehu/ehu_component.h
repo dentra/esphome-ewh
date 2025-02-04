@@ -6,6 +6,7 @@
 #include "esphome/components/binary_sensor/binary_sensor.h"
 #include "esphome/components/switch/switch.h"
 #include "esphome/components/fan/fan.h"
+#include "esphome/components/number/number.h"
 
 #ifdef USE_TIME
 #include "esphome/components/time/real_time_clock.h"
@@ -47,6 +48,8 @@ class EHUComponent : public EHUComponentBase {
 
   void set_fan(fan::Fan *fan) { this->fan_ = fan; }
 
+  void set_target_humidity(number::Number *target_humidity) { this->target_humidity_ = target_humidity; }
+
  protected:
 #ifdef USE_TIME
   esphome::time::RealTimeClock *time_{};
@@ -64,6 +67,8 @@ class EHUComponent : public EHUComponentBase {
   binary_sensor::BinarySensor *water_{};
 
   fan::Fan *fan_{};
+
+  number::Number *target_humidity_{};
 
   void dump_config_(const char *TAG) const;
 
@@ -125,6 +130,15 @@ class EHUFan : public Component, public fan::Fan {
   explicit EHUFan(EHUApi *api) : api_(api) {}
   fan::FanTraits get_traits() override;
   void control(const fan::FanCall &call) override;
+
+ protected:
+  EHUApi *api_{};
+};
+
+class EHUTargetHumidity : public number::Number, public Component {
+ public:
+  EHUTargetHumidity(EHUApi *api) : api_(api) {}
+  void control(float value) override { this->api_->set_humidity(value); }
 
  protected:
   EHUApi *api_{};
