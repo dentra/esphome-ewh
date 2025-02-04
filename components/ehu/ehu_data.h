@@ -109,6 +109,7 @@ struct ehu_state_t {
   bool lock : 8;        // 17 LOCK физ кнопок On-Off
   uint8_t _display_mode;  // 18 Отображение температуры или времени при выкл состояние
   enum : uint8_t {
+    LED_PRESET_OFF = 0,
     LED_PRESET_RANDOM = 1,
     LED_PRESET_BLUE = 2,
     LED_PRESET_GREEN = 3,
@@ -132,10 +133,8 @@ struct ehu_state_t {
   uint8_t _timer_hours;       // 33 Будильник часы
   uint8_t _timer_minutes;     // 34 Будильник минуты
   uint8_t _unknown3550[16];   // 35-41 00 00 00 00 14 00 00 14 00 00 14 00 00 00 00 00 00
-  bool _remote_control : 8;   // 51 Удаленное управление - вкл 1 или выкл 00
+  bool _remote_control : 8;   // 51 Удаленное управление - вкл 1 или выкл 00 (пульт?)
 };
-
-// aa3288010f00000000001400000000000000000000000032
 
 // aa3288...
 static_assert(sizeof(ehu_state_t) == 0x32 /*len*/ - 1 /*cmd:88*/);

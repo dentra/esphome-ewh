@@ -21,6 +21,7 @@ static const std::string PRESET_MEDITATION = "Meditation";  // 08 - Медита
 static const std::string PRESET_PRANA = "Prana";            // 0C - Prana
 static const std::string PRESET_MANUAL = "Manual";          // 0F - ручной
 
+static const std::string LED_PRESET_OFF = "Off";        // 00 - выключение
 static const std::string LED_PRESET_RANDOM = "Random";  // 01 - случайный цвет
 static const std::string LED_PRESET_BLUE = "Blue";      // 02 - синий
 static const std::string LED_PRESET_GREEN = "Green";    // 03 - зеленый
@@ -33,7 +34,7 @@ static const std::string LED_PRESET_WHITE = "White";    // 04 - белый.
   }
 
 #define ALL_LED_PRESETS \
-  { LED_PRESET_RANDOM, LED_PRESET_BLUE, LED_PRESET_GREEN, LED_PRESET_WHITE }
+  { LED_PRESET_OFF, LED_PRESET_RANDOM, LED_PRESET_BLUE, LED_PRESET_GREEN, LED_PRESET_WHITE }
 
 void EHUComponent::dump_config_(const char *TAG) const {
   LOG_SENSOR("  ", "Temperature", this->temperature_);
@@ -174,6 +175,8 @@ void EHUComponent::write_fan_preset_(const std::string &preset) const {
 
 const std::string &EHUComponent::get_led_preset_(const ehu_state_t &state) const {
   switch (state.led_preset) {
+    case ehu_state_t::LED_PRESET_OFF:
+      return LED_PRESET_OFF;
     case ehu_state_t::LED_PRESET_RANDOM:
       return LED_PRESET_RANDOM;
     case ehu_state_t::LED_PRESET_BLUE:
@@ -216,7 +219,9 @@ void EHULedPreset::control(const std::string &value) {
   if (value.empty()) {
     return;
   }
-  if (value == LED_PRESET_RANDOM) {
+  if (value == LED_PRESET_OFF) {
+    this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_OFF);
+  } else if (value == LED_PRESET_RANDOM) {
     this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_RANDOM);
   } else if (value == LED_PRESET_BLUE) {
     this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_BLUE);
