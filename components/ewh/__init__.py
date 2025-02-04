@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.components import sensor, switch
+from esphome.components import sensor, switch, time
 from esphome.const import (
     CONF_ICON,
     CONF_ID,
@@ -30,20 +30,17 @@ EWHApi = ewh_ns.class_("EWHApi", cg.Component)
 EWHComponent = ewh_ns.class_("EWHComponent", cg.Component)
 BSTSwitch = EWHComponent.class_("BSTSwitch", switch.Switch)
 
-EWHStateRef = ewh_ns.struct("ewh_state_t").operator("const").operator("ref")
+EWHState = ewh_ns.struct("ewh_state_t")
 EWHUpdateTrigger = ewh_ns.class_(
-    "EWHUpdateTrigger", automation.Trigger.template(EWHStateRef)
+    "EWHUpdateTrigger", automation.Trigger.template(rka_api.obj_const_ref(EWHState))
 )
 
-CONFIG_SCHEMA = rka_api.api_schema(EWHApi, trigger_class=EWHUpdateTrigger).extend(
-    {
-        # cv.GenerateID(CONF_TIME_ID): cv.use_id(time.RealTimeClock),
-    }
-)
+CONFIG_SCHEMA = rka_api.api_schema(EWHApi, trigger_class=EWHUpdateTrigger)
 
 EWH_COMPONENT_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_EWH_ID): cv.use_id(EWHApi),
+        cv.GenerateID(CONF_TIME_ID): cv.use_id(time.RealTimeClock),
         cv.Optional(CONF_ICON, default=ICON_WATER_BOILER): cv.icon,
         cv.Optional(CONF_BST): switch.switch_schema(
             BSTSwitch, entity_category=ENTITY_CATEGORY_CONFIG, block_inverted=True
@@ -77,7 +74,7 @@ async def new_ewh(config):
 
 
 async def to_code(config):
-    var = await rka_api.new_api(config, EWHStateRef)
+    var = await rka_api.new_api(config, EWHState)
     if CONF_TIME_ID in config:
         time_ = await cg.get_variable(config[CONF_TIME_ID])
         cg.add(var.set_time_id(time_))
