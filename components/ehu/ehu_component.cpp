@@ -219,11 +219,28 @@ void EHULedPreset::control(const std::string &value) {
   if (value.empty()) {
     return;
   }
+
   if (value == LED_PRESET_OFF) {
     this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_OFF);
-  } else if (value == LED_PRESET_RANDOM) {
+    return;
+  }
+
+  if (value == LED_PRESET_RANDOM) {
     this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_RANDOM);
-  } else if (value == LED_PRESET_BLUE) {
+    return;
+  }
+
+  // ему можно передать пресет подсветки в выключенном состоянии. он применит
+  // его и включит. при этом сам увлажнитель в статусе выключенного. Но есть
+  // хитрость - если увлажнитель выключен, включить его подсветку может только
+  // пресет Random. а когда она включилась - уже можно поменять цвет. выходит
+  // нужно отслеживать статус вкл/выкл если хотим управлять подсветкой в
+  // выключенном состоянии. и первой командой передавать пресет Random
+  if (!this->parent_->state) {
+    this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_RANDOM);
+  }
+
+  if (value == LED_PRESET_BLUE) {
     this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_BLUE);
   } else if (value == LED_PRESET_GREEN) {
     this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_GREEN);
