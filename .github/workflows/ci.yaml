@@ -10,6 +10,7 @@ env:
 
 jobs:
   build:
+    if: startsWith(github.server_url, 'https://github.com')
     runs-on: ubuntu-latest
     outputs:
       firmware-path: ${{ steps.esphome.outputs.firmware-path }}
@@ -45,7 +46,6 @@ jobs:
           ls -l ${{ steps.esphome.outputs.firmware-path }}/firmware.*
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
-        if: contains(runner.name, 'Github Actions')
         with:
           name: ${{ matrix.component }}-dev-${{ github.run_id }}.zip
           path: |
