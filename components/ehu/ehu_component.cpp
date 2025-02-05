@@ -83,7 +83,12 @@ void EHUComponent::on_state(const ehu_state_t &state) {
       this->fan_preset_->publish_state(preset);
     }
   }
-  this->publish_state_(this->led_brightness_, state.led_brightness);
+  // в режиме подсветки Random - необходимо блокировать изменения яркости.
+  // дело в том, что он плавно меняет яркость сам в момент изменения цвета.
+  // и ползунок в хом асистенте сходит с ума.
+  if (state.led_preset != ehu_state_t::LED_PRESET_RANDOM) {
+    this->publish_state_(this->led_brightness_, state.led_brightness);
+  }
   this->publish_state_(this->led_top_, state.led_mode & ehu_state_t::LED_MODE_TOP);
   this->publish_state_(this->led_bottom_, state.led_mode & ehu_state_t::LED_MODE_BOTTOM);
   if (this->led_preset_) {
