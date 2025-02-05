@@ -110,7 +110,7 @@ Humidifier components allows the following:
 - Control LED mode, presets and brightness
 - Adjust clock
 
-> 100% worked at EHU-3810D, also should work on EHU-3815D.
+> 100% worked with EHU-3810D, also should work with EHU-3815D.
 > Please let me know your model to add support or number to description.
 
 ### Help wanted
