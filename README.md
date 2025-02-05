@@ -131,12 +131,25 @@ You can download and use example configurations for:
 - [EHU](ehu.yaml)
 - [ETS](ets.yaml)
 
+You could use my video with [flashing instructions](https://t.me/esphome_tion/13868) from another project, but with your configuration.
+
 ## Experimental cloud support
 
 Please see instructions [here](components/rka_cloud/README.md).
+
+## Troubleshooting, new features and devices
+
+Don't hesitate to open [issues](https://github.com/dentra/esphome-tion/issues) for bug reports and feature requests.
+
+You can also use the [Telegram group](https://t.me/dentra_chat).
 
 ## Your thanks
 
 If this project was useful to you, you can buy me a Cup of coffee via
 [Card2Card][donate-tinkoff], [Boosty][donate-boosty] or [PayPal][donate-paypal]
 and do not forget to star this project :)
+
+## Commercial usage
+
+For questions regarding commercial use or custom development/modification,
+please contact me at [Telegram private messages](https://t.me/dtrachuk).
