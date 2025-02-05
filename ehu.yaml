@@ -68,12 +68,6 @@ uart:
 vport:
   - platform: ehu
 
-## Use this template for custom action on state event.
-# ehu:
-#   on_state:
-#     lambda: |-
-#       ESP_LOGI("main", "power state %s", ONOFF(state.power));
-
 switch:
   - platform: ehu
     name: Power
@@ -93,6 +87,17 @@ switch:
     led_top: Led Top
     led_bottom: Led Bottom
     led_preset: Led Preset
+
+## Use this template as example for any custom action on state event.
+# ehu:
+#   on_state:
+#     lambda: |-
+#       id(reached_target_humidity).publish_state(state.humidity >= state.target_humidity);
+
+# binary_sensor:
+#   - platform: template
+#     name: Reached target humidity
+#     id: reached_target_humidity
 
 ## Uncomment to enable cloud support
 # rka_cloud:
