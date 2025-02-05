@@ -28,7 +28,7 @@ This is a set of ESPHome components to control Rusklimat devices using UART prot
 - Electrolux [Water Heater](#water-heater) (EWH)
 - Ballu [Water Heater](#water-heater) (BWH)
 - Zanussi [Water Heater](#water-heater) (ZWH)
-- Electrolux [Humidifier](#humidifier) (EHU) (early beta!)
+- Electrolux [Humidifier](#humidifier) (EHU) (beta, help wanted with Ballu and Zanussi)
 - Electrolux [Thermostat](#thermostat) (ETS) (experimental!)
 
 Control is possible via custom dongle. You can make it yourself or buy a ready made.
@@ -62,7 +62,7 @@ Water heater components are build using `climate` platform and allows the follow
 - Set and start internal timer (EWH only)
 - Enter to "No Frost/Atifreeze" mode (EWH only)
 
-### Help needed
+### Help wanted
 
 When the water is heated to the required temperature, the boiler can enter to an idle mode
 (display shows 0 and temperature) but unfortunately I can't get this state yet. Obtaining
@@ -72,7 +72,7 @@ be superior. Please let me know it.
 
 ## Humidifier
 
-To control your Electrolux humidifier you need [USB 3.0](https://en.wikipedia.org/wiki/USB_3.0) cable to success connection.
+To control your Electrolux (Ballu and Zanussi also may work) humidifier you need [USB 3.0](https://en.wikipedia.org/wiki/USB_3.0) cable to success connection.
 Connection with USB 2.0 may work or may not, depending on your device revision.
 
 ![USB 3.0](https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/USB_3.0.png/640px-USB_3.0.png?download)
@@ -110,9 +110,16 @@ Humidifier components allows the following:
 - Control LED mode, presets and brightness
 - Adjust clock
 
+> 100% worked at EHU-3810D, also should work on EHU-3815D.
+> Please let me know your model to add support or number to description.
+
+### Help wanted
+
+Ballu and Zanussi humidifiers also may work. Please contact me or just leave feedback.
+
 ## Thermostat
 
-The communication UART protocol is 100% know and implemented. Connection part requires additional help and research.
+The communication UART protocol is 100% know and implemented but connection part requires additional help and research.
 
 ## Build ESPHome firmware
 
@@ -120,7 +127,7 @@ You can download and use example configurations for:
 
 - [EWH](ewh.yaml)
 - [BWH](bwh.yaml)
-- ZWH try EWH or BWH
+- ZWH use EWH or BWH configuration
 - [EHU](ehu.yaml)
 - [ETS](ets.yaml)
 
@@ -131,4 +138,5 @@ Please see instructions [here](components/rka_cloud/README.md).
 ## Your thanks
 
 If this project was useful to you, you can buy me a Cup of coffee via
-[Card2Card][donate-tinkoff], [Boosty][donate-boosty] or [PayPal][donate-paypal] :)
+[Card2Card][donate-tinkoff], [Boosty][donate-boosty] or [PayPal][donate-paypal]
+and do not forget to star this project :)
