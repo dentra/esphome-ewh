@@ -75,7 +75,11 @@ void EHUComponent::on_state(const ehu_state_t &state) {
   this->publish_state_(this->mute_, state.mute);
   this->publish_state_(this->water_, !state.water_tank_empty);
   this->publish_fan_state_(state);
-  this->publish_state_(this->target_humidity_, state.target_humidity);
+  // если целевая влажность была изменена прибором, то подождем немного т.к.
+  // set_fan_speed_ уже послал доп команду на коррецию
+  this->set_timeout("update_target_humidity", 100, [this, target_humidity = state.target_humidity]() {
+    this->publish_state_(this->target_humidity_, target_humidity);
+  });
   this->publish_state_(this->fan_speed_, state.fan_speed);
   if (this->fan_preset_) {
     auto &preset = this->get_fan_preset_(state);
@@ -196,13 +200,26 @@ const std::string &EHUComponent::get_led_preset_(const ehu_state_t &state) const
   }
 }
 
+void EHUComponent::set_fan_speed_(uint8_t fan_speed) const {
+  // да. и проблема которую я описывал при 4 кратной смене скорости вентилятора
+  // - целевая влажность устанавливается на 60 процентов.
+
+  uint8_t target_humidity = this->target_humidity_ ? this->target_humidity_->state : 0;
+
+  this->api_->set_speed(fan_speed);
+
+  if (target_humidity > 0) {
+    this->api_->set_humidity(target_humidity);
+  }
+}
+
 void EHUFan::control(const fan::FanCall &call) {
   if (call.get_state().has_value() && !*call.get_state()) {
-    this->parent_->api_->set_speed(0);
+    this->parent_->set_fan_speed_(0);
   }
 
   if (call.get_speed().has_value()) {
-    this->parent_->api_->set_speed(*call.get_speed());
+    this->parent_->set_fan_speed_(*call.get_speed());
   }
 
   this->parent_->write_fan_preset_(call.get_preset_mode());
@@ -241,7 +258,7 @@ void EHULedPreset::control(const std::string &value) {
   // пресет Random. а когда она включилась - уже можно поменять цвет. выходит
   // нужно отслеживать статус вкл/выкл если хотим управлять подсветкой в
   // выключенном состоянии. и первой командой передавать пресет Random
-  if (!this->parent_->state) {
+  if (!this->parent_->get_power_state_()) {
     this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_RANDOM);
   }
 

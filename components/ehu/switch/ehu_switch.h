@@ -18,6 +18,9 @@ class EHUPowerSwitch : public EHUComponent, public switch_::Switch {
     EHUComponent::on_state(state);
   }
   void write_state(bool state) override { this->api_->set_power(state); }
+
+ protected:
+  bool get_power_state_() const override { return this->state; }
 };
 
 }  // namespace ehu

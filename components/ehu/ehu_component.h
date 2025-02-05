@@ -92,6 +92,8 @@ class EHUComponent : public EHUComponentBase {
   void write_fan_preset_(const std::string &preset) const;
   const std::string &get_fan_preset_(const ehu_state_t &state) const;
   const std::string &get_led_preset_(const ehu_state_t &state) const;
+  void set_fan_speed_(uint8_t fan_speed) const;
+  virtual bool get_power_state_() const = 0;
 };
 
 template<uint16_t cmd_v> class EHUCommandComponent : public Component, public Parented<EHUComponent> {
