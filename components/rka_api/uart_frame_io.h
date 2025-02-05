@@ -10,6 +10,9 @@
 
 #ifndef RKA_DUMP
 #define RKA_DUMP ESP_LOGV
+#ifdef ESPHOME_LOG_HAS_VERBOSE
+#define RKA_DO_DUMP_TX 1
+#endif
 #else
 #define RKA_DO_DUMP_TX 1
 #endif
@@ -103,7 +106,7 @@ class UartFrameIO {
         }
 
         esphome::yield();
-        // let perfrom read next frame on next loop
+        // let perform read next frame on next loop
         break;
       }
       ESP_LOGW(TAG, "Unhandled read operation");
@@ -128,18 +131,16 @@ class UartFrameIO {
     crc_type crc = crc_seq.value();
     uart->write_array(reinterpret_cast<uint8_t *>(&crc), sizeof(crc));
     uart->flush();
-#if defined(ESPHOME_LOG_HAS_VERBOSE) || defined(RKA_DO_DUMP_TX)
+#if RKA_DO_DUMP_TX
     std::string s = format_hex_pretty(reinterpret_cast<uint8_t *>(&hdr), sizeof(hdr));
-    s += ' ';
     if (size != 0) {
       s += format_hex_pretty(data, size).c_str();
       auto pos = s.find('(');
       if (pos != std::string::npos) {
-        s.resize(pos);
-      } else {
-        s += ' ';
+        s.resize(pos - 1);
       }
     }
+    s += ' ';
     s += format_hex_pretty(reinterpret_cast<uint8_t *>(&crc), sizeof(crc));
     RKA_DUMP(TAG, "TX: %s (%zu)", s.c_str(), sizeof(rx_frame_t) + size);
 #endif
