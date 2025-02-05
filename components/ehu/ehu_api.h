@@ -24,17 +24,17 @@ class EHUApi : public EHUApiBase {
  public:
   explicit EHUApi(EHUVPort *vport) : EHUApiBase(vport) {}
 
-  void set_power(bool power);
-  void set_preset(uint8_t preset);
-  void set_speed(uint8_t speed);
-  void set_humidity(uint8_t humidity);
+  void set_power(bool power) const;
+  void set_preset(uint8_t preset) const;
+  void set_speed(uint8_t speed) const;
+  void set_humidity(uint8_t humidity) const;
 
-  void set_ionizer(bool lock);
-  void set_lock(bool lock);
-  void set_mute(bool mute);
+  void set_ionizer(bool lock) const;
+  void set_lock(bool lock) const;
+  void set_mute(bool mute) const;
 
-  void set_clock(uint8_t hours, uint8_t minutes);
-  void set_led_preset(uint8_t led_preset);
+  void set_clock(uint8_t hours, uint8_t minutes) const;
+  void set_led_preset(uint8_t led_preset) const;
 };
 
 }  // namespace ehu

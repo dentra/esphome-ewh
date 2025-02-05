@@ -8,7 +8,7 @@ namespace ets {
 
 static const char *const TAG = "ets_api";
 
-void ETSApi::set_mode(bool *state, float target_temp, float air_temp) {
+void ETSApi::set_mode(bool *state, float target_temp, float air_temp) const {
   if (this->unk0C_ == 0) {
     ESP_LOGW(TAG, "Сurrent state has not been received yet");
     return;

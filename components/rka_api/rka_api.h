@@ -67,17 +67,17 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
 
   void add_listener(RKAListenerBase *listener) { this->vport_->add_listener(listener); }
 
-  void request_dev_type() {
+  void request_dev_type() const {
     ESP_LOGD(internal::TAG_API, "Request dev type");
     this->write(PACKET_REQ_DEV_TYPE);
   }
 
-  void request_state() {
+  void request_state() const {
     ESP_LOGD(internal::TAG_API, "Request state");
     this->write(PACKET_REQ_STATE);
   }
 
-  void request_state_ex() {
+  void request_state_ex() const {
     ESP_LOGD(internal::TAG_API, "Request state (extended)");
     struct {
       uint8_t x[2];
@@ -86,7 +86,7 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
   }
 
   /// Write operation using PACKET_REQ_SET_COMMAND.
-  template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true> void write_op(const T &data) {
+  template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true> void write_op(const T &data) const {
     ESP_LOGD(internal::TAG_API, "Set state (%u) %s", T::SET_OPERATION,
              format_hex_pretty(reinterpret_cast<const uint8_t *>(&data), sizeof(data)).c_str());
     struct {
@@ -97,7 +97,7 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
   }
 
   /// Write state using PACKET_REQ_SET_COMMAND.
-  template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true> void write_st(const T &data) {
+  template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true> void write_st(const T &data) const {
     ESP_LOGD(internal::TAG_API, "Set state %s",
              format_hex_pretty(reinterpret_cast<const uint8_t *>(&data), sizeof(data)).c_str());
     this->write(PACKET_REQ_SET_COMMAND, data);
@@ -109,26 +109,26 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
   // }
 
   /// Write command of specified type.
-  void write(uint8_t type) {
+  void write(uint8_t type) const {
     // ESP_LOGD(internal::TAG_API, "Write %02X", type);
     this->write_(&type, sizeof(type));
   }
 
   /// Write command of specified type and data struct.
   template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true>
-  void write(uint8_t type, const T &data) {
+  void write(uint8_t type, const T &data) const {
     // ESP_LOGD(internal::TAG_API, "Write %02X: %s", type, format_hex_pretty(&data, sizeof(data)).c_str());
     rka_frame_t<T> frame{.type = type, .data = data};
     this->write_(&frame, sizeof(frame));
   }
 
   /// Write command of type from T::REQ_FRAME_TYPE and data struct.
-  template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true> void write(const T &data) {
+  template<class T, esphome::enable_if_t<std::is_class<T>::value, bool> = true> void write(const T &data) const {
     this->write(T::REQ_FRAME_TYPE, data);
   }
 
   /// Write command of specified type and byte data.
-  void write_byte(uint8_t type, uint8_t data) {
+  void write_byte(uint8_t type, uint8_t data) const {
     rka_frame_t<uint8_t> frame{.type = type, .data = data};
     this->write_(&frame, sizeof(frame));
   }
@@ -136,7 +136,9 @@ template<class vport_t /*, std::enable_if_t<std::is_base_of_v<vport::VPort, vpor
  protected:
   vport_t *vport_;
 
-  void write_(const void *data, size_t size) { this->vport_->write(*static_cast<const rka_any_frame_t *>(data), size); }
+  void write_(const void *data, size_t size) const {
+    this->vport_->write(*static_cast<const rka_any_frame_t *>(data), size);
+  }
 };
 
 }  // namespace rka_api

@@ -24,8 +24,8 @@ class BWHApi : public BWHApiBase {
  public:
   explicit BWHApi(BWHVPort *vport) : BWHApiBase(vport) {}
 
-  void set_mode(bwh_mode_t::Mode mode, uint8_t target_temperature);
-  void set_mode(const bwh_mode_t &mode);
+  void set_mode(bwh_mode_t::Mode mode, uint8_t target_temperature) const;
+  void set_mode(const bwh_mode_t &mode) const;
 
  protected:
 };

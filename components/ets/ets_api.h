@@ -26,7 +26,7 @@ class ETSApi : public ETSApiBase {
 
   void init_unk0C(uint16_t unk0C) { this->unk0C_ = unk0C; }
 
-  void set_mode(bool *state, float target_temp, float air_temp);
+  void set_mode(bool *state, float target_temp, float air_temp) const;
 
  protected:
   uint16_t unk0C_{};
