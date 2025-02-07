@@ -107,6 +107,7 @@ Humidifier components allows the following:
 - Control lock
 - Control mute
 - Monitor empty water tank
+- Monitor humidification
 - Control LED mode, presets and brightness
 - Adjust clock
 

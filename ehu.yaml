@@ -87,13 +87,13 @@ switch:
     led_top: Led Top
     led_bottom: Led Bottom
     led_preset: Led Preset
+    humidification: Humidification
 
 ## Use this template as example for any custom action on state event.
 # ehu:
 #   on_state:
 #     lambda: |-
 #       id(reached_target_humidity).publish_state(state.humidity >= state.target_humidity);
-
 # binary_sensor:
 #   - platform: template
 #     name: Reached target humidity

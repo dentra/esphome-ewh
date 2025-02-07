@@ -12,6 +12,7 @@ from esphome.const import (
     CONF_TIME_ID,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_MOISTURE,
+    DEVICE_CLASS_RUNNING,
     DEVICE_CLASS_TEMPERATURE,
     ENTITY_CATEGORY_CONFIG,
     STATE_CLASS_MEASUREMENT,
@@ -44,6 +45,7 @@ CONF_IONIZER = "ionizer"
 CONF_LOCK = "lock"
 CONF_MUTE = "mute"
 CONF_WATER = "water"
+CONF_HUMIDIFICATION = "humidification"
 CONF_FAN = "fan"
 CONF_TARGET_HUMIDITY = "target_humidity"
 CONF_LED_BRIGHTNESS = "led_brightness"
@@ -64,6 +66,7 @@ EHUFan = ehu_ns.class_("EHUFan", fan.Fan, cg.Component)
 EHUFanPreset = ehu_ns.class_("EHUFanPreset", select.Select, cg.Component)
 EHUNumber = ehu_ns.class_("EHUNumber", number.Number, cg.Component)
 EHULedPreset = ehu_ns.class_("EHULedPreset", select.Select, cg.Component)
+EHUBrightnessNumber = ehu_ns.class_("EHUBrightnessNumber", number.Number, cg.Component)
 
 EHUPacketType = ehu_ns.enum("ehu_packet_type_t", is_class=True)
 EHUStateType = ehu_ns.enum("ehu_state_t", is_class=True)
@@ -174,7 +177,7 @@ EHU_COMPONENT_SCHEMA = cv.Schema(
         ),
         cv.Optional(CONF_LED_BRIGHTNESS): cv.maybe_simple_value(
             number.number_schema(
-                EHUNumber.template(EHUPacketType.PACKET_REQ_SET_LED_BRIGHTNESS),
+                EHUBrightnessNumber  # EHUNumber.template(EHUPacketType.PACKET_REQ_SET_LED_BRIGHTNESS),
             ),
             key=CONF_NAME,
         ),
@@ -208,6 +211,10 @@ EHU_COMPONENT_SCHEMA = cv.Schema(
             ),
             key=CONF_NAME,
         ),
+        cv.Optional(CONF_HUMIDIFICATION): cv.maybe_simple_value(
+            binary_sensor.binary_sensor_schema(device_class=DEVICE_CLASS_RUNNING),
+            key=CONF_NAME,
+        ),
     }
 ).extend(cv.polling_component_schema("15s"))
 
@@ -219,10 +226,10 @@ async def setup_sensor(config: dict, key: str, fn):
         return sens
 
 
-async def setup_switch(config: dict, key: str, fn):
+async def setup_switch(config: dict, key: str, fn, *args):
     if key in config:
         parent = await cg.get_variable(config[CONF_ID])
-        var = await eh_switch.new_switch(config[key], parent)
+        var = await eh_switch.new_switch(config[key], parent, *args)
         await cg.register_component(var, config[key])
         cg.add(fn(var))
         return var
@@ -284,29 +291,46 @@ async def new_ehu(config):
 
     await setup_sensor(config, CONF_TEMPERATURE, var.set_temperature_sensor)
     await setup_sensor(config, CONF_HUMIDITY, var.set_humidity_sensor)
-    water_wm = await setup_switch(config, CONF_WARM_MIST, var.set_warm_mist_switch)
-    water_uv = await setup_switch(config, CONF_UV, var.set_uv_switch)
-    if water_wm and water_uv:
-        cg.add(water_wm.set_second(water_uv))
-        cg.add(water_uv.set_second(water_wm))
+    await setup_switch(
+        config,
+        CONF_WARM_MIST,
+        var.set_warm_mist_switch,
+        cg.RawExpression(f"&{var.st().water_flags}"),
+    )
+    await setup_switch(
+        config,
+        CONF_UV,
+        var.set_uv_switch,
+        cg.RawExpression(f"&{var.st().water_flags}"),
+    )
     await setup_switch(config, CONF_IONIZER, var.set_ionizer_switch)
     await setup_switch(config, CONF_LOCK, var.set_lock_switch)
     await setup_switch(config, CONF_MUTE, var.set_mute_switch)
     await setup_binary_sensor(config, CONF_WATER, var.set_water_binary_sensor)
+    await setup_binary_sensor(
+        config, CONF_HUMIDIFICATION, var.set_humidification_binary_sensor
+    )
     await setup_fan(config, CONF_FAN, var.set_fan)
     await setup_number(
         config, CONF_TARGET_HUMIDITY, var.set_target_humidity_number, 30, 85
     )
-    await setup_number(config, CONF_SPEED, var.set_fan_speed_number, 0, 3)
+    await setup_number(config, CONF_SPEED, var.set_fan_speed_number, 1, 3)
     await setup_select(config, CONF_PRESET, var.set_fan_preset_select, [])
     await setup_number(
         config, CONF_LED_BRIGHTNESS, var.set_led_brightness_number, 33, 99
     )
-    led_top = await setup_switch(config, CONF_LED_TOP, var.set_led_top_switch)
-    led_bot = await setup_switch(config, CONF_LED_BOTTOM, var.set_led_bottom_switch)
-    if led_top and led_bot:
-        cg.add(led_top.set_second(led_bot))
-        cg.add(led_bot.set_second(led_top))
+    await setup_switch(
+        config,
+        CONF_LED_TOP,
+        var.set_led_top_switch,
+        cg.RawExpression(f"&{var.st().led_mode}"),
+    )
+    await setup_switch(
+        config,
+        CONF_LED_BOTTOM,
+        var.set_led_bottom_switch,
+        cg.RawExpression(f"&{var.st().led_mode}"),
+    )
     await setup_select(config, CONF_LED_PRESET, var.set_led_preset_select, [])
 
     if CONF_TIME_ID in config:

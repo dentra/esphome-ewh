@@ -45,6 +45,9 @@ class EHUComponent : public EHUComponentBase {
   void set_lock_switch(switch_::Switch *lock) { this->lock_ = lock; }
   void set_mute_switch(switch_::Switch *mute) { this->mute_ = mute; }
   void set_water_binary_sensor(binary_sensor::BinarySensor *water) { this->water_ = water; }
+  void set_humidification_binary_sensor(binary_sensor::BinarySensor *humidification) {
+    this->humidification_ = humidification;
+  }
   void set_fan(fan::Fan *fan) { this->fan_ = fan; }
   void set_target_humidity_number(number::Number *target_humidity) { this->target_humidity_ = target_humidity; }
   void set_fan_speed_number(number::Number *fan_speed) { this->fan_speed_ = fan_speed; }
@@ -54,7 +57,13 @@ class EHUComponent : public EHUComponentBase {
   void set_led_bottom_switch(switch_::Switch *led_bottom) { this->led_bottom_ = led_bottom; }
   void set_led_preset_select(select::Select *led_preset) { this->led_preset_ = led_preset; }
 
+  const ehu_state_t &st() const { return this->st_; }
+  bool has_st() const { return this->has_st_; }
+
  protected:
+  ehu_state_t st_{};
+  bool has_st_{};
+
 #ifdef USE_TIME
   esphome::time::RealTimeClock *time_{};
 #endif
@@ -69,6 +78,7 @@ class EHUComponent : public EHUComponentBase {
   switch_::Switch *mute_{};
 
   binary_sensor::BinarySensor *water_{};
+  binary_sensor::BinarySensor *humidification_{};
 
   fan::Fan *fan_{};
 
@@ -93,7 +103,6 @@ class EHUComponent : public EHUComponentBase {
   const std::string &get_fan_preset_(const ehu_state_t &state) const;
   const std::string &get_led_preset_(const ehu_state_t &state) const;
   void set_fan_speed_(uint8_t fan_speed) const;
-  virtual bool get_power_state_() const = 0;
 };
 
 template<uint16_t cmd_v> class EHUCommandComponent : public Component, public Parented<EHUComponent> {
@@ -117,8 +126,8 @@ template<uint16_t cmd_v> class EHUSwitch : public switch_::Switch, public EHUCom
 template<uint16_t cmd_v, uint16_t state_flag_first_v, uint16_t state_flag_second_v>
 class EHUDependedSwitch : public EHUSwitch<cmd_v> {
  public:
-  EHUDependedSwitch(EHUComponent *c) : EHUSwitch<cmd_v>(c) {}
-  void set_second(switch_::Switch *second) { this->second_ = second; }
+  EHUDependedSwitch(EHUComponent *c, const uint8_t *st_value) : EHUSwitch<cmd_v>(c), st_value_(st_value) {}
+  void set_st_value(uint8_t *st_value) { this->st_value_ = st_value; }
 
  public:
   void write_state(bool state) override {
@@ -126,14 +135,14 @@ class EHUDependedSwitch : public EHUSwitch<cmd_v> {
     if (state) {
       data |= state_flag_first_v;
     }
-    if (this->second_ && this->second_->state) {
+    if (this->st_value_ && *this->st_value_ & state_flag_second_v) {
       data |= state_flag_second_v;
     }
     this->write_byte_(data);
   }
 
  protected:
-  switch_::Switch *second_{};
+  const uint8_t *st_value_;
 };
 
 class EHUFan : public Component, public fan::Fan, Parented<EHUComponent> {
@@ -161,6 +170,21 @@ class EHULedPreset : public select::Select, public Component, Parented<EHUCompon
   EHULedPreset(EHUComponent *c) : Parented(c) {}
   void setup() override;
   void control(const std::string &value) override;
+};
+
+class EHUBrightnessNumber : public EHUNumber<ehu_packet_type_t::PACKET_REQ_SET_LED_BRIGHTNESS> {
+ public:
+  EHUBrightnessNumber(EHUComponent *c) : EHUNumber(c) {}
+  void control(float value) override {
+    // обновил конфигурацию и перекомпилировал. в режиме подсветки рандом -
+    // ползунок теперь с ума не сходит, но все равно при его переключении
+    // некая команда на увлажнитель отправляется. потому, что он пикает. но на
+    // работу это не влияет
+    // обновляем якрость только если не работает рандом пресет или нет состояния
+    if (this->parent_->has_st() || this->parent_->st().led_preset != ehu_state_t::LED_PRESET_RANDOM) {
+      EHUNumber::control(value);
+    }
+  }
 };
 
 }  // namespace ehu

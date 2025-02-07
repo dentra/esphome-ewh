@@ -21,7 +21,8 @@ static const std::string PRESET_MEDITATION = "Meditation";  // 08 - Медита
 static const std::string PRESET_PRANA = "Prana";            // 0C - Prana
 static const std::string PRESET_MANUAL = "Manual";          // 0F - ручной
 
-static const std::string LED_PRESET_OFF = "Off";        // 00 - выключение
+static const std::string &LED_PRESET__EMPTY = PRESET__EMPTY;
+static const std::string LED_PRESET_OFF = "None";       // 00 - выключение
 static const std::string LED_PRESET_RANDOM = "Random";  // 01 - случайный цвет
 static const std::string LED_PRESET_BLUE = "Blue";      // 02 - синий
 static const std::string LED_PRESET_GREEN = "Green";    // 03 - зеленый
@@ -56,6 +57,9 @@ void EHUComponent::dump_config_(const char *TAG) const {
 }
 
 void EHUComponent::on_state(const ehu_state_t &state) {
+  this->st_ = state;
+  this->has_st_ = true;
+
 #ifdef USE_TIME
   auto time = this->time_->now();
   if (time.is_valid() && state.clock_hours != time.hour && state.clock_minutes != time.minute) {
@@ -74,33 +78,43 @@ void EHUComponent::on_state(const ehu_state_t &state) {
   this->publish_state_(this->lock_, state.lock);
   this->publish_state_(this->mute_, state.mute);
   this->publish_state_(this->water_, !state.water_tank_empty);
+
   this->publish_fan_state_(state);
+
   // если целевая влажность была изменена прибором, то подождем немного т.к.
   // set_fan_speed_ уже послал доп команду на коррецию
-  this->set_timeout("update_target_humidity", 100, [this, target_humidity = state.target_humidity]() {
-    this->publish_state_(this->target_humidity_, target_humidity);
-  });
-  this->publish_state_(this->fan_speed_, state.fan_speed);
+  this->set_timeout("update_target_humidity", 100,
+                    [this]() { this->publish_state_(this->target_humidity_, this->st_.target_humidity); });
+
+  if (state.fan_speed > 0) {
+    this->publish_state_(this->fan_speed_, state.fan_speed);
+  }
+
   if (this->fan_preset_) {
     auto &preset = this->get_fan_preset_(state);
-    if (!preset.empty()) {
+    if (!preset.empty() && this->fan_preset_->state != preset) {
       this->fan_preset_->publish_state(preset);
     }
   }
+
   // в режиме подсветки Random - необходимо блокировать изменения яркости.
   // дело в том, что он плавно меняет яркость сам в момент изменения цвета.
   // и ползунок в хом асистенте сходит с ума.
   if (state.led_preset != ehu_state_t::LED_PRESET_RANDOM) {
     this->publish_state_(this->led_brightness_, state.led_brightness);
   }
+
   this->publish_state_(this->led_top_, state.led_mode & ehu_state_t::LED_MODE_TOP);
   this->publish_state_(this->led_bottom_, state.led_mode & ehu_state_t::LED_MODE_BOTTOM);
+
   if (this->led_preset_) {
     auto &preset = this->get_led_preset_(state);
-    if (!preset.empty()) {
+    if (!preset.empty() && this->led_preset_->state != preset) {
       this->led_preset_->publish_state(preset);
     }
   }
+
+  this->publish_state_(this->humidification_, state.fan_speed != 0);
 }
 
 void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
@@ -115,7 +129,7 @@ void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
     has_changes = true;
   }
 
-  if (state.fan_speed != this->fan_->speed) {
+  if (state.fan_speed > 0 && state.fan_speed != this->fan_->speed) {
     this->fan_->speed = state.fan_speed;
     has_changes = true;
   }
@@ -196,7 +210,7 @@ const std::string &EHUComponent::get_led_preset_(const ehu_state_t &state) const
       return LED_PRESET_WHITE;
     default:
       ESP_LOGW(TAG, "Unknown LED preset %u", state.led_preset);
-      return PRESET__EMPTY;
+      return LED_PRESET__EMPTY;
   }
 }
 
@@ -258,19 +272,25 @@ void EHULedPreset::control(const std::string &value) {
   // пресет Random. а когда она включилась - уже можно поменять цвет. выходит
   // нужно отслеживать статус вкл/выкл если хотим управлять подсветкой в
   // выключенном состоянии. и первой командой передавать пресет Random
-  if (!this->parent_->get_power_state_()) {
+  if (!this->parent_->st().power) {
     this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_RANDOM);
   }
 
+  uint8_t preset;
   if (value == LED_PRESET_BLUE) {
-    this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_BLUE);
+    preset = ehu_state_t::LED_PRESET_BLUE;
   } else if (value == LED_PRESET_GREEN) {
-    this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_GREEN);
+    preset = ehu_state_t::LED_PRESET_GREEN;
   } else if (value == LED_PRESET_WHITE) {
-    this->parent_->api_->set_led_preset(ehu_state_t::LED_PRESET_WHITE);
+    preset = ehu_state_t::LED_PRESET_WHITE;
   } else {
-    ESP_LOGW(TAG, "Unknown led preset %s", value.c_str());
+    ESP_LOGW(TAG, "Invalid LED preset %s", value.c_str());
+    return;
   }
+
+  const uint32_t timeout = this->parent_->st().power ? 100 : 0;
+  this->parent_->set_timeout("set_led_preset", timeout,
+                             [api = this->parent_->api_, preset]() { api->set_led_preset(preset); });
 }
 
 }  // namespace ehu
