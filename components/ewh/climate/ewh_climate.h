@@ -14,6 +14,7 @@ class EWHClimate : public EWHComponent, public Climate {
  public:
   explicit EWHClimate(EWHApi *api) : EWHComponent(api) {}
 
+  void setup() override;
   void dump_config() override;
   ClimateTraits traits() override;
   void control(const ClimateCall &call) override;

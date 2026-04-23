@@ -7,12 +7,19 @@ namespace ewh {
 
 static const char *const TAG = "ewh.climate";
 
-static const std::string PRESET_MODE1 = "0.7 kW";
-static const std::string PRESET_MODE2 = "1.3 kW";
-static const std::string PRESET_MODE3 = "2.0 kW";
-static const std::string PRESET_NO_FROST = "No Frost";
-static const std::string PRESET_TIMER = "Timer";
-static const std::string &PRESET_DEFAULT = PRESET_MODE1;
+static const char *PRESET_MODE1 = "0.7 kW";
+static const char *PRESET_MODE2 = "1.3 kW";
+static const char *PRESET_MODE3 = "2.0 kW";
+static const char *PRESET_NO_FROST = "No Frost";
+static const char *PRESET_TIMER = "Timer";
+//static const char *const PRESET_DEFAULT = PRESET_MODE1;
+
+void EWHClimate::setup() {
+  this->set_supported_custom_presets({
+      PRESET_MODE1, PRESET_MODE2, PRESET_MODE3, PRESET_NO_FROST,
+      // PRESET_TIMER,
+  });
+}
 
 void EWHClimate::dump_config() {
   LOG_CLIMATE("", "Electrolux Water Heater", this);
@@ -21,8 +28,7 @@ void EWHClimate::dump_config() {
 
 ClimateTraits EWHClimate::traits() {
   auto traits = climate::ClimateTraits();
-
-  traits.set_supports_current_temperature(true);
+  traits.add_feature_flags(CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
   traits.set_visual_min_temperature(ewh::MIN_TEMPERATURE);
   traits.set_visual_max_temperature(ewh::MAX_TEMPERATURE);
   traits.set_visual_temperature_step(1);
@@ -32,13 +38,7 @@ ClimateTraits EWHClimate::traits() {
       ClimateMode::CLIMATE_MODE_HEAT,
   });
 
-  traits.set_supported_custom_presets({
-      PRESET_MODE1, PRESET_MODE2, PRESET_MODE3, PRESET_NO_FROST,
-      // PRESET_TIMER,
-  });
-
-  traits.set_supports_action(true);
-
+  traits.add_feature_flags(CLIMATE_SUPPORTS_ACTION);
   return traits;
 }
 
@@ -69,7 +69,7 @@ ewh_mode_t::Mode EWHClimate::to_wh_mode_(ClimateMode mode, const std::string &pr
 
 void EWHClimate::control(const ClimateCall &call) {
   const auto mode = call.get_mode().value_or(this->mode);
-  const auto preset = call.get_custom_preset().value_or(*this->custom_preset);
+  const char *preset = call.get_custom_preset().c_str();
   const auto wh_mode = this->to_wh_mode_(mode, preset);
   const auto temp = call.get_target_temperature().value_or(this->target_temperature);
   if (std::isnan(temp)) {
@@ -78,8 +78,8 @@ void EWHClimate::control(const ClimateCall &call) {
     this->api_->set_mode(wh_mode, temp);
   }
   // special case to allow achange present when is off
-  if (wh_mode == ewh_mode_t::MODE_OFF && call.get_custom_preset().has_value()) {
-    this->custom_preset = preset;
+  if (wh_mode == ewh_mode_t::MODE_OFF && call.has_custom_preset()) {
+    this->set_custom_preset_(preset);
   }
   // set_mode do not return value, so we need to request state
   this->set_timeout(100, [this]() { this->api_->request_state(); });
@@ -106,7 +106,7 @@ void EWHClimate::on_state(const ewh_state_t &status) {
 
   auto mode = climate::CLIMATE_MODE_OFF;
   auto action = climate::CLIMATE_ACTION_OFF;
-  auto preset = *this->custom_preset;
+  const char* preset = this->get_custom_preset().c_str();
   if (status.state != ewh_state_t::STATE_OFF) {
     mode = climate::CLIMATE_MODE_HEAT;
     const bool is_heating =
@@ -135,8 +135,8 @@ void EWHClimate::on_state(const ewh_state_t &status) {
     this->action = action;
     has_changes = true;
   }
-  if (preset != *this->custom_preset) {
-    this->custom_preset = preset;
+  if (strcmp(preset, this->get_custom_preset().c_str()) != 0) {
+    this->set_custom_preset_(preset);
     has_changes = true;
   }
 
