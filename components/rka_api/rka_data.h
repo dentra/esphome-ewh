@@ -6,6 +6,13 @@
 namespace esphome {
 namespace rka_api {
 
+/// Check device clock differs from actual time. Device lags up to one minute after sync, so it is not a difference.
+inline bool clock_differs(uint8_t device_hours, uint8_t device_minutes, uint8_t hours, uint8_t minutes) {
+  constexpr int day_minutes = 24 * 60;
+  const int diff = (hours * 60 + minutes - device_hours * 60 - device_minutes + day_minutes) % day_minutes;
+  return diff > 1;
+}
+
 #pragma pack(push, 1)
 
 enum rka_packet_type_t : uint8_t {
