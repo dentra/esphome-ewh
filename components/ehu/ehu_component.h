@@ -19,6 +19,8 @@
 namespace esphome {
 namespace ehu {
 
+class EHUFan;
+
 using EHUComponentBase = rka_api::RKAComponent<rka_api::rka_dev_type_t::EHU, EHUListener, EHUApi, PollingComponent>;
 
 class EHUComponent : public EHUComponentBase {
@@ -48,7 +50,7 @@ class EHUComponent : public EHUComponentBase {
   void set_humidification_binary_sensor(binary_sensor::BinarySensor *humidification) {
     this->humidification_ = humidification;
   }
-  void set_fan(fan::Fan *fan) { this->fan_ = fan; }
+  void set_fan(EHUFan *fan) { this->fan_ = fan; }
   void set_target_humidity_number(number::Number *target_humidity) { this->target_humidity_ = target_humidity; }
   void set_fan_speed_number(number::Number *fan_speed) { this->fan_speed_ = fan_speed; }
   void set_fan_preset_select(select::Select *fan_preset) { this->fan_preset_ = fan_preset; }
@@ -80,7 +82,7 @@ class EHUComponent : public EHUComponentBase {
   binary_sensor::BinarySensor *water_{};
   binary_sensor::BinarySensor *humidification_{};
 
-  fan::Fan *fan_{};
+  EHUFan *fan_{};
 
   number::Number *target_humidity_{};
   number::Number *fan_speed_{};
@@ -99,9 +101,9 @@ class EHUComponent : public EHUComponentBase {
   }
 
   void publish_fan_state_(const ehu_state_t &state);
-  void write_fan_preset_(const std::string &preset) const;
-  const std::string &get_fan_preset_(const ehu_state_t &state) const;
-  const std::string &get_led_preset_(const ehu_state_t &state) const;
+  void write_fan_preset_(StringRef preset) const;
+  const char *get_fan_preset_(const ehu_state_t &state) const;
+  const char *get_led_preset_(const ehu_state_t &state) const;
   void set_fan_speed_(uint8_t fan_speed) const;
 };
 
@@ -147,8 +149,9 @@ class EHUDependedSwitch : public EHUSwitch<cmd_v> {
 
 class EHUFan : public Component, public fan::Fan, Parented<EHUComponent> {
  public:
-  explicit EHUFan(EHUComponent *c) : Parented(c) {}
+  explicit EHUFan(EHUComponent *c);
   fan::FanTraits get_traits() override;
+  bool update_preset_mode(const char *preset);
   void control(const fan::FanCall &call) override;
 };
 
@@ -162,7 +165,7 @@ class EHUFanPreset : public select::Select, public Component, Parented<EHUCompon
  public:
   EHUFanPreset(EHUComponent *c) : Parented(c) {}
   void setup() override;
-  void control(const std::string &value) override { this->parent_->write_fan_preset_(value); }
+  void control(const std::string &value) override { this->parent_->write_fan_preset_(StringRef(value)); }
 };
 
 class EHULedPreset : public select::Select, public Component, Parented<EHUComponent> {

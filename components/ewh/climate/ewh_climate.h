@@ -12,7 +12,7 @@ using namespace esphome::climate;
 
 class EWHClimate : public EWHComponent, public Climate {
  public:
-  explicit EWHClimate(EWHApi *api) : EWHComponent(api) {}
+  explicit EWHClimate(EWHApi *api);
 
   void dump_config() override;
   ClimateTraits traits() override;
@@ -21,7 +21,7 @@ class EWHClimate : public EWHComponent, public Climate {
   void on_state(const ewh_state_t &state) override;
 
  protected:
-  ewh_mode_t::Mode to_wh_mode_(ClimateMode mode, const std::string &preset) const;
+  ewh_mode_t::Mode to_wh_mode_(ClimateMode mode, StringRef preset) const;
 };
 
 }  // namespace ewh

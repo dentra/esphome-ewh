@@ -12,7 +12,7 @@ using namespace esphome::climate;
 
 class BWHClimate : public BWHComponent, public Climate {
  public:
-  explicit BWHClimate(BWHApi *api) : BWHComponent(api) {}
+  explicit BWHClimate(BWHApi *api);
 
   void dump_config() override;
   ClimateTraits traits() override;
@@ -21,7 +21,7 @@ class BWHClimate : public BWHComponent, public Climate {
   void on_state(const bwh_state_t &state) override;
 
  protected:
-  bwh_mode_t::Mode to_wh_mode_(ClimateMode mode, const std::string &preset) const;
+  bwh_mode_t::Mode to_wh_mode_(ClimateMode mode, StringRef preset) const;
 };
 
 }  // namespace bwh

@@ -15,7 +15,7 @@ void ETSClimate::dump_config() {
 ClimateTraits ETSClimate::traits() {
   auto traits = climate::ClimateTraits();
 
-  traits.set_supports_current_temperature(true);
+  traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
   traits.set_visual_min_temperature(5.0f);
   traits.set_visual_max_temperature(45.0f);
   traits.set_visual_temperature_step(0.1f);
