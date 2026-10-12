@@ -16,7 +16,7 @@ CONFIG_SCHEMA = cv.All(
 async def to_code(config):
     if CORE.using_arduino:
         if CORE.is_esp8266:
-            cg.add_library("", "", "https://github.com/me-no-dev/ESPAsyncUDP.git")
+            cg.add_library("ESPAsyncUDP", None, "https://github.com/me-no-dev/ESPAsyncUDP.git#697c75a0255e5dccf91b4ef8b5cc28c569b3bac9")
             cg.add_build_flag("-DLWIP_SOCKET=1")
             cg.add_build_flag("-DLWIP_COMPAT_SOCKETS=0")
             cg.add_build_flag("-DLWIP_TIMEVAL_PRIVATE=0")
