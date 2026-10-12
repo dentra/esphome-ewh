@@ -4,6 +4,9 @@
 #include "esphome/components/uart/uart.h"
 #include "esphome/components/uart/uart_component.h"
 #include "esphome/components/switch/switch.h"
+#ifdef USE_OTA_STATE_LISTENER
+#include "esphome/components/ota/ota_backend.h"
+#endif
 
 #include "../esp_async_tcp/esp_async_tcp.h"
 
@@ -14,7 +17,12 @@ namespace esphome {
 namespace rka_cloud {
 
 /// High-Flying HF-LPT220 Emulation
-class RKACloud : public switch_::Switch, public Component, public rka_api::RKAVPortListener {
+class RKACloud : public switch_::Switch,
+                 public Component,
+#ifdef USE_OTA_STATE_LISTENER
+                 public ota::OTAGlobalStateListener,
+#endif
+                 public rka_api::RKAVPortListener {
   using TCPClient = esp_async_tcp::ESPAsyncClient<64>;
 
  public:
@@ -24,6 +32,9 @@ class RKACloud : public switch_::Switch, public Component, public rka_api::RKAVP
   float get_setup_priority() const override { return setup_priority::AFTER_WIFI; }
   void setup() override;
   void dump_config() override;
+#ifdef USE_OTA_STATE_LISTENER
+  void on_ota_global_state(ota::OTAState state, float progress, uint8_t error, ota::OTAComponent *comp) override;
+#endif
 
   void loop() override {
     if (this->tcp_) {

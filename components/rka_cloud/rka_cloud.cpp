@@ -2,10 +2,6 @@
 #include "esphome/core/helpers.h"
 #include "esphome/core/defines.h"
 
-#ifdef USE_OTA
-#include "esphome/components/ota/ota_backend.h"
-#endif
-
 #include "../rka_api/rka_data.h"
 #include "../rka_api/rka_io.h"
 
@@ -63,18 +59,21 @@ void RKACloud::setup() {
   if (!this->is_mac_set_()) {
     get_mac_address_raw(this->mac_);
   }
-#ifdef USE_OTA
-  auto *global_ota_callback = ota::get_global_ota_callback();
-  global_ota_callback->add_on_state_callback([this](ota::OTAState state, float, uint8_t, ota::OTAComponent *) {
-    if (state == ota::OTAState::OTA_STARTED) {
-      this->disconnect();
-      if (this->cloud_pair_) {
-        this->cloud_pair_->publish_state(false);
-      }
-    }
-  });
+#ifdef USE_OTA_STATE_LISTENER
+  ota::get_global_ota_callback()->add_global_state_listener(this);
 #endif
 }
+
+#ifdef USE_OTA_STATE_LISTENER
+void RKACloud::on_ota_global_state(ota::OTAState state, float progress, uint8_t error, ota::OTAComponent *comp) {
+  if (state == ota::OTAState::OTA_STARTED) {
+    this->disconnect();
+    if (this->cloud_pair_) {
+      this->cloud_pair_->turn_off();
+    }
+  }
+}
+#endif
 
 void RKACloud::on_data_(const void *vdata, size_t size) {
   auto data = static_cast<const uint8_t *>(vdata);

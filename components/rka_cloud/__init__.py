@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import switch
+from esphome.components import ota, switch
 from esphome.const import ENTITY_CATEGORY_CONFIG
 
 from .. import vport  # pylint: disable=relative-beyond-top-level
@@ -83,6 +83,8 @@ async def to_code(config):
     prt = await vport.vport_get_var(config)
     var = await switch.new_switch(config, prt)
     await cg.register_component(var, config)
+    # disconnect from cloud when OTA starts
+    ota.request_ota_state_listeners()
 
     if CONF_MAC in config:
         cg.add(var.set_mac(as_byte_array(config[CONF_MAC])))
@@ -91,9 +93,6 @@ async def to_code(config):
 
     cg.add(var.set_host(config[CONF_HOST]))
     cg.add(var.set_port(config[CONF_PORT]))
-
-    # enable ota subscription
-    cg.add_define("USE_OTA_STATE_CALLBACK")
 
     if CONF_PAIR in config:
         conf = config[CONF_PAIR]

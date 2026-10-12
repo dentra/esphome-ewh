@@ -3,6 +3,13 @@
 
 #include "esp_async_tcp.h"
 
+#if defined(USE_ESP32) && !defined(USE_TESTS)
+#include "esphome/components/network/util.h"
+#include "esphome/components/socket/headers.h"
+#include "lwip/err.h"
+#include "lwip/api.h"
+#endif
+
 namespace esphome {
 namespace esp_async_tcp {
 static const char *TAG = "esp_async_tcp";
@@ -36,11 +43,6 @@ ESPAsyncClient8266::ESPAsyncClient8266() {
 }
 #endif
 #if defined(USE_ESP32) && !defined(USE_TESTS)
-#include "esphome/components/network/util.h"
-#include "esphome/components/socket/headers.h"
-#include "lwip/err.h"
-#include "lwip/api.h"
-
 bool ESPAsyncClient32::connect(const char *host, uint16_t port) {
   // TODO actualise
   // if (!network::is_connected()) {
