@@ -8,6 +8,8 @@ secrets.yaml
 /.platformio
 /.build
 /.venv
+*.tmp
+uv.lock
 /esphome
 /config
 /include
