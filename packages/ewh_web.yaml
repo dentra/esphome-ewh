@@ -1,9 +1,9 @@
 # This package enables additional sensors showed in web interface.
 # Requires to be included after ewh.yaml
 # packages:
-#   web: github://dentra/esphome-ewh/packages/ewh-web.yaml@$project_branch
+#   web: github://dentra/esphome-ewh/packages/ewh_web.yaml@$project_branch
 # or if you like from local filesystem:
-#   web: !include packages/web.yaml
+#   web: !include packages/ewh_web.yaml
 
 web_server:
   # show internal sensors in UI
@@ -55,14 +55,22 @@ select:
     internal: true
     name: Mode
     options: ["0.7 kW", "1.3 kW", "2.0 kW", "No Frost", "Timer"]
-    lambda: return *id(whc).custom_preset;
+    lambda: |-
+      if (!id(whc).has_custom_preset()) {
+        return {};
+      }
+      return id(whc).get_custom_preset().str();
     set_action:
       lambda: |-
         if (x == "Timer") {
         #ifdef USE_TIME
+          if (std::isnan(id(whc).target_temperature)) {
+            ESP_LOGW("ewh_web", "Target temperature is unknown, can't set timer");
+            return;
+          }
           id(whc).get_api()->set_timer(
-            strtol(id(wh_timer_hours).state.c_str(), nullptr, 10),
-            strtol(id(wh_timer_minutes).state.c_str(), nullptr, 10),
+            strtol(id(wh_timer_hours).current_option().c_str(), nullptr, 10),
+            strtol(id(wh_timer_minutes).current_option().c_str(), nullptr, 10),
             id(whc).target_temperature
           );
         #else
@@ -70,7 +78,7 @@ select:
         #endif
         } else {
           ClimateCall cc = id(whc).make_call();
-          cc.set_preset(x);
+          cc.set_preset(x.c_str(), x.size());
           cc.perform();
         }
 

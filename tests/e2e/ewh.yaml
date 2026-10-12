@@ -7,6 +7,12 @@ esphome:
 
 host:
 
+packages:
+  web: !include ../../packages/ewh_web.yaml
+
+# web_server is not available on host, compile the rest of web package
+web_server: !remove
+
 logger:
   level: DEBUG
 
