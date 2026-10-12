@@ -10,6 +10,8 @@ namespace ewh {
 enum {
   MIN_TEMPERATURE = 35,
   MAX_TEMPERATURE = 75,
+  // temperature maintained in no frost mode
+  NO_FROST_TEMPERATURE = 7,
 };
 
 #pragma pack(push, 1)

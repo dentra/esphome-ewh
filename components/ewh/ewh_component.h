@@ -58,8 +58,6 @@ class EWHComponent : public EWHComponentBase {
 
   void on_state(const ewh_state_t &state) override;
 
-  // void set_idle_temp_drop(uint8_t idle_temp_drop) { this->idle_temp_drop_ = idle_temp_drop; }
-
  protected:
 #ifdef USE_SWITCH
   switch_::Switch *bst_{};
@@ -70,10 +68,6 @@ class EWHComponent : public EWHComponentBase {
 #ifdef USE_TIME
   esphome::time::RealTimeClock *time_{};
 #endif
-
-  // uint8_t idle_temp_drop_ = {};
-  // uint8_t prev_temp_ = {};
-  // bool is_idle_(const ewh_state_t &state);
 };
 
 }  // namespace ewh

@@ -19,8 +19,6 @@ CONF_BST = "bst"
 CONF_EWH_ID = "ewh_id"
 CONF_ERROR_CODE = "error_code"
 
-# CONF_IDLE_TEMP_DROP = "idle_temp_drop"
-
 ICON_WATER_BOILER = "mdi:water-boiler"
 ICON_CLOCK = "mdi:clock"
 
@@ -45,7 +43,6 @@ EWH_COMPONENT_SCHEMA = cv.Schema(
         cv.Optional(CONF_BST): switch.switch_schema(
             BSTSwitch, entity_category=ENTITY_CATEGORY_CONFIG, block_inverted=True
         ),
-        # cv.Optional(CONF_IDLE_TEMP_DROP, default=5): cv.uint8_t,
         cv.Optional(CONF_ERROR_CODE): sensor.sensor_schema(
             icon="mdi:water-boiler-alert",
             accuracy_decimals=0,
@@ -63,8 +60,6 @@ async def new_ewh(config):
     if CONF_BST in config:
         sens = await switch.new_switch(config[CONF_BST], api)
         cg.add(var.set_bst(sens))
-
-    # cg.add(var.set_idle_temp_drop(config[CONF_IDLE_TEMP_DROP]))
 
     if CONF_ERROR_CODE in config:
         sens = await sensor.new_sensor(config[CONF_ERROR_CODE])

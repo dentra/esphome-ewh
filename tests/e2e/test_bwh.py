@@ -70,3 +70,26 @@ async def test_on_state_trigger_fires_once_per_state(bwh):
     bwh.device.push_state()
     await bwh.wait_state("error_code", lambda s: s.state == 5)
     assert bwh.states[bwh.key("on_state_count")].state == first + 1
+
+
+async def test_heating_estimation_with_custom_idle_temp_drop(bwh):
+    bwh.device.state = BWH.STATE_2000W
+    bwh.device.current_temperature = 60
+    bwh.device.push_state()
+    await bwh.wait_state(CLIMATE, lambda s: s.action == ClimateAction.IDLE)
+    await bwh.wait_state("power", lambda s: s.state == 0)
+    # idle_temp_drop is 3
+    bwh.device.current_temperature = 57
+    bwh.device.push_state()
+    await bwh.wait_state(CLIMATE, lambda s: s.current_temperature == 57)
+    assert bwh.states[bwh.key(CLIMATE)].action == ClimateAction.IDLE
+    bwh.device.current_temperature = 56
+    bwh.device.push_state()
+    await bwh.wait_state(CLIMATE, lambda s: s.action == ClimateAction.HEATING)
+    await bwh.wait_state("power", lambda s: s.state == 2000)
+
+
+async def test_power_1300w(bwh):
+    bwh.device.state = BWH.STATE_1300W
+    bwh.device.push_state()
+    await bwh.wait_state("power", lambda s: s.state == 1300)

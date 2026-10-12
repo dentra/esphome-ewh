@@ -1,7 +1,16 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.const import CONF_ID, CONF_ON_STATE, CONF_TRIGGER_ID
+from esphome.components import sensor
+from esphome.const import (
+    CONF_ID,
+    CONF_ON_STATE,
+    CONF_POWER,
+    CONF_TRIGGER_ID,
+    DEVICE_CLASS_POWER,
+    STATE_CLASS_MEASUREMENT,
+    UNIT_WATT,
+)
 
 from .. import vport  # pylint: disable=relative-beyond-top-level
 
@@ -57,3 +66,28 @@ async def new_api(config, state_class: None):
                 trigger, [(state_ref_class, "state")], conf
             )
     return var
+
+
+CONF_IDLE_TEMP_DROP = "idle_temp_drop"
+
+# water heater heating estimation options
+HEATING_SCHEMA = cv.Schema(
+    {
+        # temperature drop after reaching target until heating element turns on again
+        cv.Optional(CONF_IDLE_TEMP_DROP, default=5): cv.int_range(min=1, max=30),
+        # estimated power consumption
+        cv.Optional(CONF_POWER): sensor.sensor_schema(
+            unit_of_measurement=UNIT_WATT,
+            accuracy_decimals=0,
+            device_class=DEVICE_CLASS_POWER,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+    }
+)
+
+
+async def setup_heating(var, config):
+    cg.add(var.set_idle_temp_drop(config[CONF_IDLE_TEMP_DROP]))
+    if CONF_POWER in config:
+        sens = await sensor.new_sensor(config[CONF_POWER])
+        cg.add(var.set_power_sensor(sens))

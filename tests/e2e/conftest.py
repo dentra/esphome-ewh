@@ -127,7 +127,9 @@ def node_factory(firmware, tmp_path) -> Callable[[str, Device], Any]:
 
         log_path = tmp_path / f"{name}.log"
         log = log_path.open("w")
-        proc = subprocess.Popen([program], stdout=log, stderr=subprocess.STDOUT)
+        # isolated preferences for each test
+        env = os.environ | {"ESPHOME_PREFDIR": str(tmp_path)}
+        proc = subprocess.Popen([program], stdout=log, stderr=subprocess.STDOUT, env=env)
         client = APIClient("127.0.0.1", int(subs["api_port"]), None)
         try:
             async with asyncio.timeout(10):

@@ -57,3 +57,6 @@ sensor:
 climate:
   - platform: bwh
     name: Water Heater
+    idle_temp_drop: 3
+    power:
+      name: Power

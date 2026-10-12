@@ -61,12 +61,30 @@ Water heater components are build using `climate` platform and allows the follow
 - Sync and control internal clock (EWH only)
 - Set and start internal timer (EWH only)
 - Enter to "No Frost/Atifreeze" mode (EWH only)
+- Estimate power and energy consumption, see [packages/energy.yaml](packages/energy.yaml)
+
+Heating element state is not reported by the boiler, so it is estimated by temperature changes:
+heating stops when target temperature is reached and starts again when water cools down by
+`idle_temp_drop` degrees (climate option, default `5`). Power is estimated by nominal power
+of the current mode.
+
+```yaml
+climate:
+  - platform: ewh
+    id: whc
+    name: Climate
+    # Optional, temperature drop after reaching target until heating starts again
+    idle_temp_drop: 5
+    # Optional, estimated power consumption sensor
+    power:
+      name: Power
+```
 
 ### Help wanted
 
 When the water is heated to the required temperature, the boiler can enter to an idle mode
 (display shows 0 and temperature) but unfortunately I can't get this state yet. Obtaining
-this state will allow to make energy calculation. If you know the command that can be sent
+this state will allow to make exact energy calculation instead of estimation. If you know the command that can be sent
 to the boiler to get this state or even grab internal boiler firmware binary - it will
 be superior. Please let me know it.
 

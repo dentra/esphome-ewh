@@ -1,0 +1,30 @@
+# This package enables estimated power and energy consumption sensors.
+# Device does not report heating element state, so power is estimated by temperature changes
+# and nominal power of current mode. Energy sensor can be used in Home Assistant Energy dashboard.
+# Requires climate with `id: whc`.
+# packages:
+#   energy: github://dentra/esphome-ewh/packages/energy.yaml@$project_branch
+# or if you like from local filesystem:
+#   energy: !include packages/energy.yaml
+
+climate:
+  - id: !extend whc
+    power:
+      id: wh_power
+      name: Power
+
+sensor:
+  - platform: integration
+    id: wh_energy
+    name: Energy
+    sensor: wh_power
+    time_unit: h
+    integration_method: left
+    restore: true
+    unit_of_measurement: kWh
+    accuracy_decimals: 3
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      # Wh -> kWh
+      - multiply: 0.001

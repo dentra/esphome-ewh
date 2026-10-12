@@ -18,7 +18,11 @@ BWHClimate::BWHClimate(BWHApi *api) : BWHComponent(api) {
   });
 }
 
-void BWHClimate::dump_config() { LOG_CLIMATE("", "Ballu Water Heater", this); }
+void BWHClimate::dump_config() {
+  LOG_CLIMATE("", "Ballu Water Heater", this);
+  ESP_LOGCONFIG(TAG, "  Idle temperature drop: %u", this->heating_.get_idle_temp_drop());
+  LOG_SENSOR("  ", "Power", this->power_);
+}
 
 ClimateTraits BWHClimate::traits() {
   auto traits = climate::ClimateTraits();
@@ -90,10 +94,10 @@ void BWHClimate::on_state(const bwh_state_t &status) {
   auto mode = climate::CLIMATE_MODE_OFF;
   auto action = climate::CLIMATE_ACTION_OFF;
   const char *preset = nullptr;
-  if (status.state != bwh_state_t::STATE_OFF) {
+  const bool is_on = status.state != bwh_state_t::STATE_OFF;
+  const bool is_heating = this->update_heating_(status);
+  if (is_on) {
     mode = climate::CLIMATE_MODE_HEAT;
-    const bool is_heating =
-        (static_cast<int>(status.target_temperature) - static_cast<int>(status.current_temperature)) > 1;
     action = is_heating ? climate::CLIMATE_ACTION_HEATING : ClimateAction::CLIMATE_ACTION_IDLE;
     if (status.state == bwh_state_t::STATE_1300W) {
       preset = PRESET_MODE2;
@@ -120,7 +124,34 @@ void BWHClimate::on_state(const bwh_state_t &status) {
     this->publish_state();
   }
 
+  this->publish_power_(status);
+
   BWHComponent::on_state(status);
+}
+
+void BWHClimate::publish_power_(const bwh_state_t &state) {
+  if (this->power_ == nullptr) {
+    return;
+  }
+  float power = 0;
+  if (this->heating_.is_heating()) {
+    if (state.state == bwh_state_t::STATE_1300W) {
+      power = 1300;
+    } else if (state.state == bwh_state_t::STATE_2000W) {
+      power = 2000;
+    }
+  }
+  // publish on every state to let energy integration grow while power is not changed
+  this->power_->publish_state(power);
+}
+
+bool BWHClimate::update_heating_(const bwh_state_t &state) {
+  const bool is_on = state.state != bwh_state_t::STATE_OFF;
+  if (is_on && (state.target_temperature < bwh::MIN_TEMPERATURE || state.target_temperature > bwh::MAX_TEMPERATURE)) {
+    // invalid target temperature, keep previous estimation
+    return this->heating_.is_heating();
+  }
+  return this->heating_.update(is_on, state.current_temperature, state.target_temperature);
 }
 
 // void BWHClimate::read(const ewh_state_t &state) {
