@@ -78,8 +78,8 @@ void EWHClimate::control(const ClimateCall &call) {
     this->api_->set_mode(wh_mode, temp);
   }
   // special case to allow achange present when is off
-  if (wh_mode == ewh_mode_t::MODE_OFF && call.has_custom_preset()) {
-    this->set_custom_preset_(preset);
+  if (wh_mode == ewh_mode_t::MODE_OFF && call.has_custom_preset() && this->set_custom_preset_(preset)) {
+    this->publish_state();
   }
   // set_mode do not return value, so we need to request state
   this->set_timeout(100, [this]() { this->api_->request_state(); });
