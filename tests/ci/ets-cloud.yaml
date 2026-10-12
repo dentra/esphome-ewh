@@ -1,0 +1,4 @@
+# CI build of ets.yaml with cloud support
+packages:
+  ets: !include ../../ets.yaml
+  cloud: !include ../../packages/cloud.yaml

@@ -30,11 +30,27 @@ jobs:
       fail-fast: false
       matrix:
         # run copies of the current job in parallel
-        component:
-          - ewh
-          - bwh
-          - ets
-          - ehu
+        include:
+          - name: ewh
+            config: ewh.yaml
+            source: ./components
+          - name: bwh
+            config: bwh.yaml
+            source: ./components
+          - name: ets
+            config: ets.yaml
+            source: ./components
+          - name: ehu
+            config: ehu.yaml
+            source: ./components
+          # esp32 esp-idf with cloud
+          - name: ewh-cloud
+            config: tests/ci/ewh-cloud.yaml
+            source: ../../components
+          # esp8266 arduino with cloud
+          - name: ets-cloud
+            config: tests/ci/ets-cloud.yaml
+            source: ../../components
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -49,8 +65,8 @@ jobs:
         id: esphome
         with:
           version: ${{ env.ESPHOME_VERSION }}
-          config: ${{ matrix.component }}.yaml
-          substitutions: '{"project_version": "dev", "project_name": "${{ matrix.component }}", "project_source": "./components"}'
+          config: ${{ matrix.config }}
+          substitutions: '{"project_version": "dev", "project_name": "${{ matrix.name }}", "project_source": "${{ matrix.source }}"}'
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Show firmware artifacts
         run: |
@@ -58,7 +74,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.component }}-dev-${{ github.run_id }}.zip
+          name: ${{ matrix.name }}-dev-${{ github.run_id }}.zip
           path: |
             ${{ steps.esphome.outputs.firmware-path }}/firmware.*
             !${{ steps.esphome.outputs.firmware-path }}/firmware.bin

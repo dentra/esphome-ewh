@@ -1,0 +1,4 @@
+# CI build of ewh.yaml with cloud support
+packages:
+  ewh: !include ../../ewh.yaml
+  cloud: !include ../../packages/cloud.yaml
