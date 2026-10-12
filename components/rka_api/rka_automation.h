@@ -6,7 +6,8 @@
 namespace esphome {
 namespace rka_api {
 
-template<class ApiT, class StateT> class RKAUpdateTrigger : public RKAListener<StateT>, public Trigger<const StateT &> {
+template<class ApiT, class StateT, class ListenerT = RKAListener<StateT>>
+class RKAUpdateTrigger : public ListenerT, public Trigger<const StateT &> {
  public:
   explicit RKAUpdateTrigger(ApiT *parent) { parent->add_listener(this); }
   void on_state(const StateT &state) override { this->trigger(state); }

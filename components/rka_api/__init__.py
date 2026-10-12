@@ -15,10 +15,14 @@ def obj_const_ref(class_: cg.MockObjClass):
     return class_.operator("const").operator("ref")
 
 
-def update_trigger(apiClass: cg.MockObjClass, stateStruct: cg.MockObjClass):
+def update_trigger(
+    apiClass: cg.MockObjClass,
+    stateStruct: cg.MockObjClass,
+    listenerClass: cg.MockObjClass,
+):
     return rka_ns.class_(
         "RKAUpdateTrigger", automation.Trigger.template(apiClass)
-    ).template(apiClass, stateStruct)
+    ).template(apiClass, stateStruct, listenerClass)
 
 
 def api_schema(api_class, trigger_class=None) -> cv.Schema:
@@ -48,8 +52,8 @@ async def new_api(config, state_class: None):
         state_ref_class = obj_const_ref(state_class)
         for conf in config.get(CONF_ON_STATE, []):
             trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
+            # trigger registers itself as listener in constructor
             await automation.build_automation(
                 trigger, [(state_ref_class, "state")], conf
             )
-            cg.add(var.add_listener(trigger))
     return var

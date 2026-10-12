@@ -59,6 +59,7 @@ ehu_ns = cg.esphome_ns.namespace("ehu")
 EHUApi = ehu_ns.class_("EHUApi", cg.Component)
 EHUComponent = ehu_ns.class_("EHUComponent", cg.Component)
 EHUState = ehu_ns.struct("ehu_state_t")
+EHUListener = ehu_ns.class_("EHUListener")
 
 EHUSwitch = ehu_ns.class_("EHUSwitch", eh_switch.Switch, cg.Component)
 EHUDependedSwitch = ehu_ns.class_("EHUDependedSwitch", eh_switch.Switch, cg.Component)
@@ -72,7 +73,7 @@ EHUPacketType = ehu_ns.enum("ehu_packet_type_t", is_class=True)
 EHUStateType = ehu_ns.enum("ehu_state_t", is_class=True)
 
 CONFIG_SCHEMA = rka_api.api_schema(
-    EHUApi, trigger_class=rka_api.update_trigger(EHUApi, EHUState)
+    EHUApi, trigger_class=rka_api.update_trigger(EHUApi, EHUState, EHUListener)
 )
 
 EHU_COMPONENT_SCHEMA = cv.Schema(

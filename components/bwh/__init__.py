@@ -1,6 +1,5 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome import automation
 from esphome.const import CONF_ICON, CONF_ID, CONF_TIME_ID
 
 from .. import rka_api  # pylint: disable=relative-beyond-top-level
@@ -16,14 +15,14 @@ ICON_CLOCK = "mdi:clock"
 bwh_ns = cg.esphome_ns.namespace("bwh")
 
 BWHApi = bwh_ns.class_("BWHApi", cg.Component)
-BWHComponent = bwh_ns.class_("EWHComponent", cg.Component)
+BWHComponent = bwh_ns.class_("BWHComponent", cg.Component)
 
-BWHState = bwh_ns.struct("ewh_state_t")
-BWHUpdateTrigger = bwh_ns.class_(
-    "EWHUpdateTrigger", automation.Trigger.template(rka_api.obj_const_ref(BWHState))
+BWHState = bwh_ns.struct("bwh_state_t")
+BWHListener = bwh_ns.class_("BWHListener")
+
+CONFIG_SCHEMA = rka_api.api_schema(
+    BWHApi, trigger_class=rka_api.update_trigger(BWHApi, BWHState, BWHListener)
 )
-
-CONFIG_SCHEMA = rka_api.api_schema(BWHApi, trigger_class=BWHUpdateTrigger)
 
 BWH_COMPONENT_SCHEMA = cv.Schema(
     {
