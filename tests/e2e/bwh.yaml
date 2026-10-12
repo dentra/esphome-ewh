@@ -1,0 +1,59 @@
+substitutions:
+  uart_port: /tmp/esphome-ewh-e2e-bwh
+  api_port: "16055"
+
+esphome:
+  name: bwh-e2e
+
+host:
+
+logger:
+  level: DEBUG
+
+api:
+  port: $api_port
+
+external_components:
+  - source: github://dentra/esphome-components@master
+    components: [etl, vport]
+    refresh: 1d
+  - source:
+      type: local
+      path: ../../components
+
+time:
+  - platform: host
+
+uart:
+  port: $uart_port
+  baud_rate: 9600
+
+vport:
+  - platform: bwh
+
+globals:
+  - id: state_count
+    type: int
+
+bwh:
+  on_state:
+    then:
+      - lambda: id(state_count)++;
+      - sensor.template.publish:
+          id: on_state_count
+          state: !lambda return id(state_count);
+      - sensor.template.publish:
+          id: error_code
+          state: !lambda return state.error;
+
+sensor:
+  - platform: template
+    id: error_code
+    name: Error Code
+  - platform: template
+    id: on_state_count
+    name: On State Count
+
+climate:
+  - platform: bwh
+    name: Water Heater

@@ -9,6 +9,17 @@ env:
   PYTHON_VERSION: "3.12"
 
 jobs:
+  e2e:
+    if: startsWith(github.server_url, 'https://github.com')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+      - name: Run E2E tests
+        run: uv run pytest
+
   build:
     if: startsWith(github.server_url, 'https://github.com')
     runs-on: ubuntu-latest

@@ -1,0 +1,65 @@
+substitutions:
+  uart_port: /tmp/esphome-ewh-e2e-ehu
+  api_port: "16054"
+
+esphome:
+  name: ehu-e2e
+
+host:
+
+logger:
+  level: DEBUG
+
+api:
+  port: $api_port
+
+external_components:
+  - source: github://dentra/esphome-components@master
+    components: [etl, vport]
+    refresh: 1d
+  - source:
+      type: local
+      path: ../../components
+
+time:
+  - platform: host
+
+uart:
+  port: $uart_port
+  baud_rate: 9600
+
+vport:
+  - platform: ehu
+
+ehu:
+  on_state:
+    then:
+      - sensor.template.publish:
+          id: raw_humidity
+          state: !lambda return state.humidity;
+
+sensor:
+  - platform: template
+    id: raw_humidity
+    name: Raw Humidity
+
+switch:
+  - platform: ehu
+    name: Power
+    temperature: Temperature
+    humidity: Humidity
+    warm_mist: Warm Mist
+    uv: UV
+    ionizer: Ionizer
+    lock: Lock
+    mute: Mute
+    water: Water
+    target_humidity: Target Humidity
+    speed: Speed
+    preset: Preset
+    fan: Fan
+    led_brightness: Led Brightness
+    led_top: Led Top
+    led_bottom: Led Bottom
+    led_preset: Led Preset
+    humidification: Humidification
