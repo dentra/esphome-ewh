@@ -176,7 +176,7 @@ const char *EHUComponent::get_fan_preset_(const ehu_state_t &state) const {
     case ehu_state_t::PRESET_YOGA:
       return PRESET_YOGA;
     default:
-      ESP_LOGW(TAG, "Unknown fan preset %u", state.led_preset);
+      ESP_LOGW(TAG, "Unknown fan preset %u", state.preset);
       return nullptr;
   }
 }

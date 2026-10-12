@@ -55,7 +55,7 @@ class EHUComponent : public EHUComponentBase {
   void set_fan_speed_number(number::Number *fan_speed) { this->fan_speed_ = fan_speed; }
   void set_fan_preset_select(select::Select *fan_preset) { this->fan_preset_ = fan_preset; }
   void set_led_brightness_number(number::Number *led_brightness) { this->led_brightness_ = led_brightness; }
-  void set_led_top_switch(switch_::Switch *led_top) { this->led_top_ = led_top_; }
+  void set_led_top_switch(switch_::Switch *led_top) { this->led_top_ = led_top; }
   void set_led_bottom_switch(switch_::Switch *led_bottom) { this->led_bottom_ = led_bottom; }
   void set_led_preset_select(select::Select *led_preset) { this->led_preset_ = led_preset; }
 
@@ -184,7 +184,7 @@ class EHUBrightnessNumber : public EHUNumber<ehu_packet_type_t::PACKET_REQ_SET_L
     // некая команда на увлажнитель отправляется. потому, что он пикает. но на
     // работу это не влияет
     // обновляем якрость только если не работает рандом пресет или нет состояния
-    if (this->parent_->has_st() || this->parent_->st().led_preset != ehu_state_t::LED_PRESET_RANDOM) {
+    if (!this->parent_->has_st() || this->parent_->st().led_preset != ehu_state_t::LED_PRESET_RANDOM) {
       EHUNumber::control(value);
     }
   }
