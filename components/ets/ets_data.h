@@ -1,4 +1,6 @@
 #pragma once
+#include <cmath>
+
 #include "../rka_api/rka_data.h"
 
 namespace esphome {
@@ -46,10 +48,19 @@ struct ets_state_t {
   uint8_t unk10;              // 00 - always 00?
   uint8_t open_wnd_mode;      // 00-off, 01-on
   uint8_t chld_lck;           // 00-on,01-off # блокировка ручного режима
+  // ffa1 = -95 = -9.5, lower values are not valid too
+  static constexpr int16_t FLOOR_TEMP_NOT_CONNECTED = -95;
+
   bool is_off() const { return state_ == 0; }
-  float target_temp() const { return __builtin_bswap16(target_temp_) * 0.1f; }
-  float air_temp() const { return __builtin_bswap16(air_temp_) * 0.1f; }
-  float floor_temp() const { return __builtin_bswap16(floor_temp_) * 0.1f; }
+  float target_temp() const { return be_temp_(target_temp_); }
+  float air_temp() const { return be_temp_(air_temp_); }
+  float floor_temp() const { return be_temp_(floor_temp_); }
+  bool has_floor_temp() const {
+    return static_cast<int16_t>(__builtin_bswap16(floor_temp_)) > FLOOR_TEMP_NOT_CONNECTED;
+  }
+
+ protected:
+  static float be_temp_(int16_t value) { return static_cast<int16_t>(__builtin_bswap16(value)) * 0.1f; }
 };
 
 struct ets_mode_t {
@@ -70,8 +81,13 @@ struct ets_mode_t {
   uint8_t open_wnd_mode{UNCHANGED};      // 7f-unchanged, 00-off, 01-on
   uint8_t chld_lck{UNCHANGED};           // 7f-unchanged, 00-off,01-on};
   void set_state(bool is_on) { state_ = is_on ? 1 : 0; }
-  void target_temp(float value) { target_temp_ = __builtin_bswap16(value * 10); }
-  void air_temp(float value) { air_temp_ = __builtin_bswap16(value * 10); }
+  void target_temp(float value) { target_temp_ = to_be_temp_(value); }
+  void air_temp(float value) { air_temp_ = to_be_temp_(value); }
+
+ protected:
+  static int16_t to_be_temp_(float value) {
+    return static_cast<int16_t>(__builtin_bswap16(static_cast<uint16_t>(static_cast<int16_t>(lroundf(value * 10)))));
+  }
 };
 #pragma pack(pop)
 

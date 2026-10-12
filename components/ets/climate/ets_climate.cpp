@@ -49,11 +49,8 @@ void ETSClimate::on_state(const ets_state_t &state) {
   this->mode = state.is_off() ? climate::CLIMATE_MODE_OFF : climate::CLIMATE_MODE_HEAT;
   this->publish_state();
 
-  if (this->floor_temp_) {
-    float floor_temp = state.floor_temp();
-    if (floor_temp > -10.0f) {
-      this->floor_temp_->publish_state(floor_temp);
-    }
+  if (this->floor_temp_ && state.has_floor_temp()) {
+    this->floor_temp_->publish_state(state.floor_temp());
   }
 }
 
