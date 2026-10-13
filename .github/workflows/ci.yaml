@@ -51,6 +51,10 @@ jobs:
           - name: ets-cloud
             config: tests/ci/ets-cloud.yaml
             source: ../../components
+          # esp32-s3 esp-idf with all local packages
+          - name: ewh-local
+            config: tests/ci/ewh-local.yaml
+            source: ../../components
     steps:
       - name: Check out code
         uses: actions/checkout@v4

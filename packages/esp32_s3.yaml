@@ -4,6 +4,5 @@ substitutions:
 packages:
   esp32: !include esp32.yaml
 
-esphome:
-  platformio_options:
-    board_build.flash_mode: dio
+esp32:
+  flash_mode: dio

@@ -1,0 +1,51 @@
+# CI build of ewh with all packages taken from this repository instead of remote master.
+# Validates package changes before they are pushed.
+substitutions:
+  friendly_name: "Water Heater"
+  node_name: "water-heater"
+  time_platform: "sntp"
+  wifi_ssid: "fake_ssid"
+  wifi_password: "12345678"
+  wifi_ap_password: "12345678"
+  tx_pin: GPIO19
+  rx_pin: GPIO20
+  project_source: ../../components
+
+packages:
+  wifi_signal: !include ../../packages/wifi_signal.yaml
+  uptime: !include ../../packages/uptime.yaml
+  restart: !include ../../packages/restart.yaml
+  clock: !include ../../packages/clock.yaml
+  timer: !include ../../packages/timer.yaml
+  ewh_web: !include ../../packages/ewh_web.yaml
+  energy: !include ../../packages/energy.yaml
+  cloud: !include ../../packages/cloud.yaml
+  debug_uart: !include ../../packages/debug_uart.yaml
+  base: !include ../../packages/base.yaml
+  esp32_s3: !include ../../packages/esp32_s3.yaml
+
+api:
+
+wifi:
+  ssid: $wifi_ssid
+  password: $wifi_password
+  ap:
+    password: $wifi_ap_password
+
+time:
+  - platform: $time_platform
+
+uart:
+  - tx_pin: $tx_pin
+    rx_pin: $rx_pin
+    baud_rate: 9600
+
+vport:
+  - platform: ewh
+
+climate:
+  - platform: ewh
+    id: whc
+    name: Climate
+    bst:
+      name: "BST"

@@ -1,4 +1,3 @@
 esphome:
-  platformio_options:
-    build_flags:
-      - -DRKA_DUMP=ESP_LOGD
+  build_flags:
+    - -DRKA_DUMP=ESP_LOGD

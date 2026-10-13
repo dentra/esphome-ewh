@@ -179,7 +179,7 @@ bool EWHClimate::update_heating_(const ewh_state_t &state) {
   // timer waits for the scheduled time, heating is unknown, so do not count it
   const bool is_on = state.state != ewh_state_t::STATE_OFF && state.state != ewh_state_t::STATE_TIMER;
   // no frost mode keeps water just above freezing regardless of target temperature
-  const uint8_t target = state.state == ewh_state_t::STATE_NO_FROST ? NO_FROST_TEMPERATURE : state.target_temperature;
+  const uint8_t target = state.state == ewh_state_t::STATE_NO_FROST ? static_cast<uint8_t>(NO_FROST_TEMPERATURE) : state.target_temperature;
   if (is_on && state.state != ewh_state_t::STATE_NO_FROST &&
       (target < ewh::MIN_TEMPERATURE || target > ewh::MAX_TEMPERATURE)) {
     // invalid target temperature, keep previous estimation
