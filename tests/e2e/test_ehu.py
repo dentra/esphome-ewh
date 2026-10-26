@@ -19,14 +19,19 @@ def push(node, **fields) -> None:
     node.device.push_state()
 
 
+def has_state(state):
+    # api sends placeholder states on subscribe, before the first device response
+    return not state.missing_state
+
+
 async def test_initial_state(ehu):
-    assert (await ehu.wait_state("humidity", lambda s: True)).state == 45
+    assert (await ehu.wait_state("humidity", has_state)).state == 45
     assert not (await ehu.wait_state("power", lambda s: True)).state
-    assert (await ehu.wait_state("water", lambda s: True)).state
-    assert (await ehu.wait_state("target_humidity", lambda s: True)).state == 50
-    assert (await ehu.wait_state("led_brightness", lambda s: True)).state == 66
-    assert (await ehu.wait_state("preset", lambda s: True)).state == "Manual"
-    assert (await ehu.wait_state("led_preset", lambda s: True)).state == "None"
+    assert (await ehu.wait_state("water", has_state)).state
+    assert (await ehu.wait_state("target_humidity", has_state)).state == 50
+    assert (await ehu.wait_state("led_brightness", has_state)).state == 66
+    assert (await ehu.wait_state("preset", has_state)).state == "Manual"
+    assert (await ehu.wait_state("led_preset", has_state)).state == "None"
 
 
 async def test_water_tank_empty(ehu):
