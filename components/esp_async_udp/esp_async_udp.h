@@ -2,9 +2,9 @@
 
 #include <functional>
 
-#if defined(USE_ESP8266_FRAMEWORK_ARDUINO) || defined(USE_TESTS)
-#include "ESPAsyncUDP.h"
-#endif  // USE_ESP8266_FRAMEWORK_ARDUINO
+#ifdef USE_ESP8266
+#include <WiFiUdp.h>
+#endif
 
 namespace esphome {
 namespace esp_async_udp {
@@ -18,32 +18,34 @@ class ESPAsyncUDPBase {
   on_packet_type cb_packet_;
 };
 
-#if defined(USE_ESP8266_FRAMEWORK_ARDUINO) || defined(USE_TESTS)
+#ifdef USE_ESP8266
 class ESPAsyncUDP8266 : public ESPAsyncUDPBase {
  public:
-  ESPAsyncUDP8266();
-  ~ESPAsyncUDP8266() { this->close(); }
   bool listen_multicast(const char *group_addr, uint16_t port);
-  void close() { this->udp_.close(); }
-  bool is_connected() { return this->udp_.connected(); }
+  void close();
   ssize_t sendto(const uint8_t *data, size_t size, uint32_t addr, uint16_t port);
-  void loop() {}
-#ifdef USE_TESTS
-  AsyncUDP *client() { return &this->udp_; }
-#endif
+
  protected:
-  AsyncUDP udp_;
+  WiFiUDP udp_;
+  IPAddress group_;
+  void loop_(uint8_t *buf, size_t recv_buf_size);
 };
 
-template<size_t recv_buf_size = 16> using ESPAsyncUDP = ESPAsyncUDP8266;
+template<size_t recv_buf_size = 16> class ESPAsyncUDP : public ESPAsyncUDP8266 {
+ public:
+  ~ESPAsyncUDP() { this->close(); }
+  void loop() {
+    uint8_t buf[recv_buf_size]{};
+    this->loop_(buf, recv_buf_size);
+  }
+};
 #endif
 
-#if defined(USE_ESP32) && !defined(USE_TESTS)
+#ifdef USE_ESP32
 class ESPAsyncUDP32 : public ESPAsyncUDPBase {
  public:
   bool listen_multicast(const char *group_addr, uint16_t port);
   void close();
-  bool is_connected() { return this->sock_ >= 0; }
   ssize_t sendto(const uint8_t *data, size_t size, uint32_t addr, uint16_t port);
 
  protected:
@@ -62,9 +64,7 @@ template<size_t recv_buf_size = 16> class ESPAsyncUDP : public ESPAsyncUDP32 {
     this->loop_(buf, recv_buf_size);
   }
 };
-#endif  // USE_ESP32
+#endif
 
 }  // namespace esp_async_udp
 }  // namespace esphome
-
-// #endif

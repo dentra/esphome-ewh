@@ -10,7 +10,6 @@ defines=(
 # project specific libraries
 lib_deps=(
   "etlcpp/Embedded Template Library"
-  "https://github.com/me-no-dev/ESPAsyncUDP.git"
 )
 
 # project additional includes
