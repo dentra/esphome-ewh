@@ -12,12 +12,14 @@ void EWHComponent::dump_config() { LOG_EWH(); }
 
 void EWHComponent::on_state(const ewh_state_t &state) {
 #ifdef USE_TIME
-  auto time = this->time_->now();
-  if (time.is_valid() && rka_api::clock_differs(state.clock_hours, state.clock_minutes, time.hour, time.minute)) {
-    this->defer([this]() {
-      auto time = this->time_->now();
-      this->api_->set_clock(time.hour, time.minute);
-    });
+  if (this->time_ != nullptr) {
+    auto time = this->time_->now();
+    if (time.is_valid() && rka_api::clock_differs(state.clock_hours, state.clock_minutes, time.hour, time.minute)) {
+      this->defer([this]() {
+        auto time = this->time_->now();
+        this->api_->set_clock(time.hour, time.minute);
+      });
+    }
   }
 #endif
 #ifdef USE_SWITCH

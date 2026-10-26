@@ -73,12 +73,14 @@ void EHUComponent::on_state(const ehu_state_t &state) {
   this->has_st_ = true;
 
 #ifdef USE_TIME
-  auto time = this->time_->now();
-  if (time.is_valid() && rka_api::clock_differs(state.clock_hours, state.clock_minutes, time.hour, time.minute)) {
-    this->defer([this]() {
-      auto time = this->time_->now();
-      this->api_->set_clock(time.hour, time.minute);
-    });
+  if (this->time_ != nullptr) {
+    auto time = this->time_->now();
+    if (time.is_valid() && rka_api::clock_differs(state.clock_hours, state.clock_minutes, time.hour, time.minute)) {
+      this->defer([this]() {
+        auto time = this->time_->now();
+        this->api_->set_clock(time.hour, time.minute);
+      });
+    }
   }
 #endif
 

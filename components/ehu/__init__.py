@@ -79,7 +79,7 @@ CONFIG_SCHEMA = rka_api.api_schema(
 EHU_COMPONENT_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_EHU_ID): cv.use_id(EHUApi),
-        cv.GenerateID(CONF_TIME_ID): cv.use_id(time.RealTimeClock),
+        cv.OnlyWith(CONF_TIME_ID, "time"): cv.use_id(time.RealTimeClock),
         cv.Optional(CONF_TEMPERATURE): cv.maybe_simple_value(
             sensor.sensor_schema(
                 unit_of_measurement=UNIT_CELSIUS,

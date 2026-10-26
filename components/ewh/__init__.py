@@ -38,7 +38,7 @@ CONFIG_SCHEMA = rka_api.api_schema(EWHApi, trigger_class=EWHUpdateTrigger)
 EWH_COMPONENT_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_EWH_ID): cv.use_id(EWHApi),
-        cv.GenerateID(CONF_TIME_ID): cv.use_id(time.RealTimeClock),
+        cv.OnlyWith(CONF_TIME_ID, "time"): cv.use_id(time.RealTimeClock),
         cv.Optional(CONF_ICON, default=ICON_WATER_BOILER): cv.icon,
         cv.Optional(CONF_BST): switch.switch_schema(
             BSTSwitch, entity_category=ENTITY_CATEGORY_CONFIG, block_inverted=True
@@ -57,6 +57,10 @@ async def new_ewh(config):
     var = cg.new_Pvariable(config[CONF_ID], api)
     await cg.register_component(var, config)
 
+    if CONF_TIME_ID in config:
+        time_ = await cg.get_variable(config[CONF_TIME_ID])
+        cg.add(var.set_time_id(time_))
+
     if CONF_BST in config:
         sens = await switch.new_switch(config[CONF_BST], api)
         cg.add(var.set_bst(sens))
@@ -69,8 +73,4 @@ async def new_ewh(config):
 
 
 async def to_code(config):
-    var = await rka_api.new_api(config, EWHState)
-    if CONF_TIME_ID in config:
-        time_ = await cg.get_variable(config[CONF_TIME_ID])
-        cg.add(var.set_time_id(time_))
-
+    await rka_api.new_api(config, EWHState)
