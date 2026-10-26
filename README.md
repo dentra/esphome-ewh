@@ -4,7 +4,7 @@
 [![ESPHome release][esphome-release-shield]][esphome-release]
 [![Open in Visual Studio Code][open-in-vscode-shield]][open-in-vscode]
 [![Community Forum][community-forum-shield]][community-forum]
-[![Support author][donate-tinkoff-shield]][donate-tinkoff]
+[![Support author][donate-tbank-shield]][donate-tbank]
 [![Support author][donate-boosty-shield]][donate-boosty]
 [![PayPal.Me][donate-paypal-shield]][donate-paypal]
 
@@ -16,8 +16,8 @@
 [open-in-vscode]: https://open.vscode.dev/dentra/esphome-components
 [community-forum-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Forum&style=popout&color=41bdf5&logo=HomeAssistant&logoColor=white
 [community-forum]: https://community.home-assistant.io/t/electrolux-water-heater-integration/368498
-[donate-tinkoff-shield]: https://img.shields.io/static/v1?label=Support+Author&message=Tinkoff&color=yellow
-[donate-tinkoff]: https://www.tinkoff.ru/cf/3dZPaLYDBAI
+[donate-tbank-shield]: https://img.shields.io/static/v1?label=Support+Author&message=T-Bank&color=yellow
+[donate-tbank]: https://t.tb.ru/pm_short/3dZPaLYDBAI
 [donate-boosty-shield]: https://img.shields.io/static/v1?label=Support+Author&message=Boosty&color=red
 [donate-boosty]: https://boosty.to/dentra
 [donate-paypal-shield]: https://img.shields.io/static/v1.svg?label=%20&message=PayPal.Me&logo=paypal
@@ -165,7 +165,7 @@ You can also use the [Telegram group](https://t.me/dentra_chat).
 ## Your thanks
 
 If this project was useful to you, you can buy me a Cup of coffee via
-[Card2Card][donate-tinkoff], [Boosty][donate-boosty] or [PayPal][donate-paypal]
+[Card2Card][donate-tbank], [Boosty][donate-boosty] or [PayPal][donate-paypal]
 and do not forget to star this project :)
 
 ## Commercial usage
