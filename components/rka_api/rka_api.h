@@ -4,6 +4,7 @@
 
 #include "esphome/core/log.h"
 #include "esphome/core/component.h"
+#include "esphome/core/alloc_helpers.h"
 
 #include "rka_vport.h"
 #include "rka_data.h"

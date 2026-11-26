@@ -1,6 +1,8 @@
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
 
+#include "esphome/core/alloc_helpers.h"
+
 #include "esp_async_tcp.h"
 
 #if defined(USE_ESP32) && !defined(USE_TESTS)

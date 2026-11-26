@@ -9,7 +9,7 @@ on:
       - ".devcontainer/**"
 
 env:
-  ESPHOME_VERSION: "2026.10.0"
+  ESPHOME_VERSION: "2026.11.1"
   PYTHON_VERSION: "3.12"
 
 jobs:

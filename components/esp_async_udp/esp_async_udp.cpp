@@ -1,6 +1,8 @@
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
 
+#include "esphome/core/alloc_helpers.h"
+
 #include "esp_async_udp.h"
 
 #ifdef USE_ESP8266

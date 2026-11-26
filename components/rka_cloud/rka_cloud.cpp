@@ -1,6 +1,7 @@
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/defines.h"
+#include "esphome/core/alloc_helpers.h"
 
 #include "../rka_api/rka_data.h"
 #include "../rka_api/rka_io.h"

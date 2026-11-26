@@ -6,13 +6,15 @@ requires-python = ">=3.14,<3.15"
 [dependency-groups]
 dev = [
     "black",
-    "esphome==2026.10.0",
+    "esphome==2026.11.1",
     "pytest",
     "pytest-asyncio",
 ]
 
 [tool.uv]
 package = false
+# esphome 2026.11.1 требует cryptography==50.0.2, а aioesphomeapi на x86_64 macOS — <49
+environments = ["sys_platform == 'linux'", "platform_machine == 'arm64' and sys_platform != 'linux'"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

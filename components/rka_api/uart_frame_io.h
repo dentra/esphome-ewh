@@ -6,6 +6,8 @@
 #include "esphome/core/helpers.h"
 #include "esphome/core/hal.h"
 
+#include "esphome/core/alloc_helpers.h"
+
 #ifndef RKA_DUMP
 #define RKA_DUMP ESP_LOGV
 #ifdef ESPHOME_LOG_HAS_VERBOSE

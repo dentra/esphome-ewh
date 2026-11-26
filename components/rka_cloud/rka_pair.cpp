@@ -2,6 +2,8 @@
 #include "esphome/core/helpers.h"
 #include "esphome/core/defines.h"
 
+#include "esphome/core/alloc_helpers.h"
+
 #include "rka_pair.h"
 
 namespace esphome {
